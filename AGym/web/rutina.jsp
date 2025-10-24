@@ -25,7 +25,7 @@
 </head>
 <body>
     <header>
-        <h1><a href="dashboard.html">AGym</a></h1>
+        <h1><a href="dashboard.jsp">AGym</a></h1>
         <nav>
             <a href="logout">Cerrar Sesión</a>
         </nav>
@@ -54,7 +54,7 @@
                 <p>No se pudo generar una rutina. Por favor, intenta de nuevo.</p>
             <% } %>
 
-            <a href="dashboard.html" class="btn">Volver al Panel</a>
+            <a href="dashboard.jsp" class="btn">Volver al Panel</a>
         </div>
     </main>
 </body>
