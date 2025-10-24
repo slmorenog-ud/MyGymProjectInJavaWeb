@@ -2,6 +2,7 @@
 <%@ page import="com.agym.modelo.Rutina" %>
 <%@ page import="com.agym.modelo.Ejercicio" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.agym.modelo.Rutina.DiaRutina" %>
 
 <%
     Rutina rutina = (Rutina) request.getAttribute("rutina");

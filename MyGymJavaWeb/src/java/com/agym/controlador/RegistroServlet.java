@@ -37,12 +37,19 @@ public class RegistroServlet extends HttpServlet {
                 }
             }
 
-            // Crear nuevo usuario
+            // Crear nuevo usuario y asignar un ID único
+            int maxId = usuarios.stream()
+                                .mapToInt(Usuario::getId)
+                                .max()
+                                .orElse(0);
+
             Usuario nuevoUsuario = new Usuario();
-            nuevoUsuario.setId(usuarios.size() + 1); // ID simple basado en el tamaño de la lista
+            nuevoUsuario.setId(maxId + 1);
             nuevoUsuario.setNombre(nombre);
             nuevoUsuario.setEmail(email);
-            nuevoUsuario.setPassword(password); // En una app real, aquí se debería hashear la contraseña
+            // TODO: ¡Vulnerabilidad de seguridad! Las contraseñas se guardan en texto plano.
+            // Se debe implementar un hash de contraseñas (ej. jBcrypt) antes de pasar a producción.
+            nuevoUsuario.setPassword(password);
             nuevoUsuario.setFechaNacimiento(fechaNacimiento);
             nuevoUsuario.setGenero(genero);
 
