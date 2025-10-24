@@ -12,6 +12,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +40,7 @@ public class GenerarRutinaServlet extends HttpServlet {
         usuario.setExperiencia(request.getParameter("experiencia"));
         usuario.setDiasDisponibles(Integer.parseInt(request.getParameter("dias")));
         usuario.setObjetivo(request.getParameter("objetivo"));
+        usuario.setPrioridadMuscular(request.getParameter("prioridadMuscular"));
 
         // Guardar los datos actualizados del usuario
         String realPath = getServletContext().getRealPath("/");
@@ -62,31 +66,89 @@ public class GenerarRutinaServlet extends HttpServlet {
         request.getRequestDispatcher("rutina.jsp").forward(request, response);
     }
 
-    private Rutina generarRutinaLogica(Usuario usuario, List<Ejercicio> ejercicios) {
+    private Rutina generarRutinaLogica(Usuario usuario, List<Ejercicio> todosLosEjercicios) {
         Rutina rutina = new Rutina();
-        String seriesYRepeticiones = getSeriesYRepeticionesPorObjetivo(usuario.getObjetivo(), usuario.getExperiencia());
+        int edad = calcularEdad(usuario.getFechaNacimiento());
+        String seriesYRepeticionesBase = getSeriesYRepeticionesPorObjetivo(usuario.getObjetivo(), usuario.getExperiencia());
+
+        // Ajuste por edad
+        if (edad > 50 && seriesYRepeticionesBase.startsWith("4")) {
+            seriesYRepeticionesBase = "3" + seriesYRepeticionesBase.substring(1);
+        } else if (edad > 50 && seriesYRepeticionesBase.startsWith("5")) {
+             seriesYRepeticionesBase = "4" + seriesYRepeticionesBase.substring(1);
+        }
 
         switch (usuario.getDiasDisponibles()) {
             case 2:
-                // 2 días: Full Body (2 ejercicios por grupo muscular principal)
-                rutina.agregarDia(crearDiaRutina("Día 1: Cuerpo Completo", ejercicios, usuario.getExperiencia(), seriesYRepeticiones, 2, "Pecho", "Espalda", "Piernas"));
-                rutina.agregarDia(crearDiaRutina("Día 2: Cuerpo Completo", ejercicios, usuario.getExperiencia(), seriesYRepeticiones, 2, "Pecho", "Espalda", "Piernas"));
+                rutina.agregarDia(crearDiaRutina("Día 1: Cuerpo Completo", todosLosEjercicios, usuario.getExperiencia(), seriesYRepeticionesBase, 2, "Pecho", "Espalda", "Piernas"));
+                rutina.agregarDia(crearDiaRutina("Día 2: Cuerpo Completo", todosLosEjercicios, usuario.getExperiencia(), seriesYRepeticionesBase, 2, "Pecho", "Espalda", "Piernas"));
                 break;
             case 3:
-                // 3 días: Push/Pull/Legs
-                rutina.agregarDia(crearDiaRutina("Día 1: Empuje", ejercicios, usuario.getExperiencia(), seriesYRepeticiones, 2, "Pecho", "Hombros", "Triceps"));
-                rutina.agregarDia(crearDiaRutina("Día 2: Tirón", ejercicios, usuario.getExperiencia(), seriesYRepeticiones, 2, "Espalda", "Biceps"));
-                rutina.agregarDia(crearDiaRutina("Día 3: Pierna", ejercicios, usuario.getExperiencia(), seriesYRepeticiones, 3, "Piernas"));
+                rutina.agregarDia(crearDiaRutina("Día 1: Empuje", todosLosEjercicios, usuario.getExperiencia(), seriesYRepeticionesBase, 2, "Pecho", "Hombros", "Triceps"));
+                rutina.agregarDia(crearDiaRutina("Día 2: Tirón", todosLosEjercicios, usuario.getExperiencia(), seriesYRepeticionesBase, 2, "Espalda", "Biceps"));
+                rutina.agregarDia(crearDiaRutina("Día 3: Pierna", todosLosEjercicios, usuario.getExperiencia(), seriesYRepeticionesBase, 3, "Piernas"));
                 break;
             case 4:
-                // 4 días: Superior/Inferior
-                rutina.agregarDia(crearDiaRutina("Día 1: Tren Superior", ejercicios, usuario.getExperiencia(), seriesYRepeticiones, 2, "Pecho", "Espalda", "Hombros"));
-                rutina.agregarDia(crearDiaRutina("Día 2: Tren Inferior", ejercicios, usuario.getExperiencia(), seriesYRepeticiones, 3, "Piernas"));
-                rutina.agregarDia(crearDiaRutina("Día 3: Tren Superior", ejercicios, usuario.getExperiencia(), seriesYRepeticiones, 2, "Pecho", "Espalda", "Biceps", "Triceps"));
-                rutina.agregarDia(crearDiaRutina("Día 4: Tren Inferior", ejercicios, usuario.getExperiencia(), seriesYRepeticiones, 3, "Piernas"));
+                rutina.agregarDia(crearDiaRutina("Día 1: Tren Superior", todosLosEjercicios, usuario.getExperiencia(), seriesYRepeticionesBase, 2, "Pecho", "Espalda", "Hombros"));
+                rutina.agregarDia(crearDiaRutina("Día 2: Tren Inferior", todosLosEjercicios, usuario.getExperiencia(), seriesYRepeticionesBase, 3, "Piernas"));
+                rutina.agregarDia(crearDiaRutina("Día 3: Tren Superior", todosLosEjercicios, usuario.getExperiencia(), seriesYRepeticionesBase, 2, "Pecho", "Espalda", "Biceps", "Triceps"));
+                rutina.agregarDia(crearDiaRutina("Día 4: Tren Inferior", todosLosEjercicios, usuario.getExperiencia(), seriesYRepeticionesBase, 3, "Piernas"));
                 break;
         }
+
+        // Ajuste por prioridad muscular
+        String prioridad = usuario.getPrioridadMuscular();
+        if (prioridad != null && !prioridad.equals("sin_preferencia")) {
+            agregarEjercicioPrioritario(rutina, todosLosEjercicios, usuario, seriesYRepeticionesBase);
+        }
+
         return rutina;
+    }
+
+    private void agregarEjercicioPrioritario(Rutina rutina, List<Ejercicio> todosLosEjercicios, Usuario usuario, String seriesYRepeticiones) {
+        String grupoPrioritario = "";
+        switch (usuario.getPrioridadMuscular()) {
+            case "tren_superior":
+                grupoPrioritario = "Pecho"; // O Espalda, Hombros
+                break;
+            case "tren_inferior":
+                grupoPrioritario = "Piernas";
+                break;
+            case "brazos":
+                grupoPrioritario = "Biceps"; // O Triceps
+                break;
+        }
+
+        if (!grupoPrioritario.isEmpty()) {
+            // Filtrar ejercicios adecuados para el grupo prioritario
+            String finalGrupoPrioritario = grupoPrioritario;
+            List<Ejercicio> ejerciciosPrioritarios = todosLosEjercicios.stream()
+                .filter(e -> finalGrupoPrioritario.equalsIgnoreCase(e.getGrupoMuscular()))
+                .collect(Collectors.toList());
+
+            Collections.shuffle(ejerciciosPrioritarios);
+
+            if (!ejerciciosPrioritarios.isEmpty()) {
+                Ejercicio ejercicioExtra = ejerciciosPrioritarios.get(0);
+                ejercicioExtra.setSeriesYRepeticiones(seriesYRepeticiones);
+
+                // Buscar un día adecuado para añadir el ejercicio
+                for (Rutina.DiaRutina dia : rutina.getDias()) {
+                    if (dia.getNombre().toLowerCase().contains("superior") && finalGrupoPrioritario.equals("Pecho")) {
+                        dia.agregarEjercicio(ejercicioExtra);
+                        break;
+                    }
+                    if (dia.getNombre().toLowerCase().contains("inferior") && finalGrupoPrioritario.equals("Piernas")) {
+                        dia.agregarEjercicio(ejercicioExtra);
+                        break;
+                    }
+                     if (dia.getNombre().toLowerCase().contains("empuje") && finalGrupoPrioritario.equals("Pecho")) {
+                        dia.agregarEjercicio(ejercicioExtra);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private Rutina.DiaRutina crearDiaRutina(String nombreDia, List<Ejercicio> todosEjercicios, String experiencia, String seriesYRepeticiones, int numEjerciciosPorGrupo, String... gruposMusculares) {
@@ -146,6 +208,20 @@ public class GenerarRutinaServlet extends HttpServlet {
                 }
             default:
                 return "3 series de 10 repeticiones";
+        }
+    }
+
+    private int calcularEdad(String fechaNacimiento) {
+        if (fechaNacimiento == null || fechaNacimiento.isEmpty()) {
+            return 0;
+        }
+        try {
+            LocalDate fechaNac = LocalDate.parse(fechaNacimiento);
+            LocalDate ahora = LocalDate.now();
+            return Period.between(fechaNac, ahora).getYears();
+        } catch (DateTimeParseException e) {
+            System.err.println("Error al parsear la fecha de nacimiento: " + fechaNacimiento);
+            return 0; // Retornar 0 si el formato es incorrecto
         }
     }
 }

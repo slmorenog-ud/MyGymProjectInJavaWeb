@@ -60,6 +60,14 @@
                     <option value="fortalecer" <%= "fortalecer".equals(usuario.getObjetivo()) ? "selected" : "" %>>Fortalecer (Fuerza)</option>
                 </select>
 
+                <label for="prioridadMuscular">¿Qué grupo muscular te gustaría priorizar? (Opcional)</label>
+                <select id="prioridadMuscular" name="prioridadMuscular">
+                    <option value="sin_preferencia" <%= "sin_preferencia".equals(usuario.getPrioridadMuscular()) ? "selected" : "" %>>Sin preferencia</option>
+                    <option value="tren_superior" <%= "tren_superior".equals(usuario.getPrioridadMuscular()) ? "selected" : "" %>>Tren Superior</option>
+                    <option value="tren_inferior" <%= "tren_inferior".equals(usuario.getPrioridadMuscular()) ? "selected" : "" %>>Tren Inferior</option>
+                    <option value="brazos" <%= "brazos".equals(usuario.getPrioridadMuscular()) ? "selected" : "" %>>Brazos</option>
+                </select>
+
                 <button type="submit" class="btn">Generar mi Rutina</button>
             </form>
         </div>

@@ -12,6 +12,7 @@ public class Usuario {
     private String experiencia;
     private String objetivo;
     private int diasDisponibles;
+    private String prioridadMuscular;
 
     // Getters y Setters
     public int getId() { return id; }
@@ -36,4 +37,6 @@ public class Usuario {
     public void setObjetivo(String objetivo) { this.objetivo = objetivo; }
     public int getDiasDisponibles() { return diasDisponibles; }
     public void setDiasDisponibles(int diasDisponibles) { this.diasDisponibles = diasDisponibles; }
+    public String getPrioridadMuscular() { return prioridadMuscular; }
+    public void setPrioridadMuscular(String prioridadMuscular) { this.prioridadMuscular = prioridadMuscular; }
 }

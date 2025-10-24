@@ -37,6 +37,7 @@ public class JsonUtil {
                 usuario.setPassword(jsonObject.optString("password"));
                 usuario.setFechaNacimiento(jsonObject.optString("fechaNacimiento"));
                 usuario.setGenero(jsonObject.optString("genero"));
+                usuario.setPrioridadMuscular(jsonObject.optString("prioridadMuscular", "sin_preferencia")); // Valor por defecto
                 usuarios.add(usuario);
             }
         }
@@ -53,6 +54,7 @@ public class JsonUtil {
             jsonObject.put("password", usuario.getPassword());
             jsonObject.put("fechaNacimiento", usuario.getFechaNacimiento());
             jsonObject.put("genero", usuario.getGenero());
+            jsonObject.put("prioridadMuscular", usuario.getPrioridadMuscular());
             jsonArray.put(jsonObject);
         }
 
