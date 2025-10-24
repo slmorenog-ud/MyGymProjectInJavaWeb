@@ -1,0 +1,250 @@
+\documentclass[11pt,a4paper]{article}
+
+%----------------------------------------------------------------------
+% PREÁMBULO Y CONFIGURACIÓN DE PAQUETES
+%----------------------------------------------------------------------
+
+% --- Fuentes y Soporte de Idioma ---
+\usepackage{fontspec}
+\setmainfont{Source Sans Pro} % Fuente principal, elegante y legible
+\setmonofont{JetBrains Mono} % Fuente monoespaciada, ideal para código
+
+\usepackage[spanish]{babel} % Soporte para el idioma español
+
+% --- Diseño de Página y Estructura ---
+\usepackage{geometry}
+\geometry{margin=2.5cm} % Márgenes generosos
+\usepackage{parskip} % Párrafos separados por espacio vertical, no por indentación
+\usepackage{hyperref} % Enlaces internos y externos
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+}
+
+% --- Encabezados y Pies de Página ---
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Análisis de Principios de Diseño}
+\fancyhead[R]{MyGymJavaWeb}
+\fancyfoot[C]{\thepage}
+
+%----------------------------------------------------------------------
+% CONFIGURACIÓN DE LISTINGS PARA EL CÓDIGO
+%----------------------------------------------------------------------
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Definición de colores para el estilo del código
+\definecolor{codebg}{rgb}{0.96,0.96,0.96}      % Fondo ligeramente gris
+\definecolor{codeframe}{rgb}{0.85,0.85,0.85}   % Borde del marco
+\definecolor{keyword}{rgb}{0.13,0.13,0.85}     % Palabras clave (azul oscuro)
+\definecolor{comment}{rgb}{0.25,0.5,0.35}      % Comentarios (verde)
+\definecolor{string}{rgb}{0.75,0.0,0.0}        % Cadenas de texto (rojo oscuro)
+\definecolor{linenumber}{rgb}{0.5,0.5,0.5}      % Números de línea (gris)
+
+% Definición del estilo "mintedlike"
+\lstdefinestyle{mintedlike}{
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  framesep=6pt,
+  framerule=0.6pt,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{keyword}\bfseries,
+  commentstyle=\itshape\color{comment},
+  stringstyle=\color{string},
+  numbers=left,
+  numberstyle=\tiny\color{linenumber},
+  stepnumber=1,
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  postbreak=\mbox{\textcolor{codeframe}{$\hookrightarrow$}\space},
+  tabsize=2,
+  captionpos=b,
+  xleftmargin=6pt,
+  xrightmargin=0pt
+}
+
+% Aplicar el estilo globalmente
+\lstset{style=mintedlike, language=Java}
+
+
+%----------------------------------------------------------------------
+% DOCUMENTO PRINCIPAL
+%----------------------------------------------------------------------
+\begin{document}
+
+\title{Análisis de Principios de Diseño de Software \\ \large Aplicados en el Proyecto MyGymJavaWeb}
+\author{Sergio Leonardo Moreno Granado}
+\date{\today}
+\maketitle
+
+\begin{abstract}
+Este documento detalla la aplicación de principios fundamentales de diseño de software en el desarrollo del proyecto MyGymJavaWeb, una aplicación web de gestión de gimnasio. El objetivo es evidenciar cómo estos principios han guiado la arquitectura del sistema para hacerlo más mantenible, escalable y robusto, incluso utilizando un enfoque simple sin frameworks complejos.
+\end{abstract}
+
+% --- PRINCIPIOS YA DESCRITOS ---
+
+\section{Principio de Abierto/Cerrado (Open/Closed Principle - OCP)}
+\subsection{Definición}
+El principio de Abierto/Cerrado establece que las entidades de software deben estar **abiertas para la extensión, pero cerradas para la modificación**.
+\subsection{Aplicación en MyGymJavaWeb}
+Este principio se observa en el \texttt{GenerarRutinaServlet}. El método \texttt{generarRutinaLogica} construye la rutina base. Esta parte está "cerrada". Cuando añadimos funcionalidades como el ajuste por edad o la priorización muscular, lo hacemos extendiendo la lógica \emph{alrededor} de este núcleo, no modificándolo.
+\begin{lstlisting}[caption={Extensión de la lógica en \texttt{GenerarRutinaServlet.java}}]
+private Rutina generarRutinaLogica(Usuario usuario, List<Ejercicio> todosLosEjercicios) {
+    // ... (cálculo de edad y series base) ...
+
+    // --- PARTE CERRADA: Creación de la rutina base ---
+    switch (usuario.getDiasDisponibles()) {
+        // ... Lógica para 2, 3, o 4 días ...
+    }
+
+    // --- PARTE ABIERTA: Extensión de la funcionalidad ---
+    String prioridad = usuario.getPrioridadMuscular();
+    if (prioridad != null && !prioridad.equals("sin_preferencia")) {
+        agregarEjercicioPrioritario(rutina, todosLosEjercicios, usuario, ...);
+    }
+    return rutina;
+}
+\end{lstlisting}
+
+\section{Principio de Sustitución de Liskov (Liskov Substitution Principle - LSP)}
+\subsection{Definición}
+Este principio afirma que los objetos de una superclase deben poder ser reemplazados por objetos de una subclase sin afectar la correctitud del programa.
+\subsection{Aplicación en MyGymJavaWeb}
+El diseño de MyGymJavaWeb no hace un uso extensivo de la herencia, por lo que no hay un ejemplo claro de LSP. Esta decisión arquitectónica en sí misma honra el principio al evitar los problemas comunes de jerarquías de herencia mal diseñadas. El sistema no viola el LSP porque no crea las condiciones para hacerlo.
+
+\section{Principio KISS (Keep It Simple, Stupid)}
+\subsection{Definición}
+KISS aboga por la simplicidad y sostiene que la mayoría de los sistemas funcionan mejor si se mantienen simples en lugar de complicados.
+\subsection{Aplicación en MyGymJavaWeb}
+El principio KISS es la piedra angular del proyecto. Se manifiesta en:
+\begin{itemize}
+    \item \textbf{Persistencia de Datos:} Se usaron archivos JSON en lugar de una base de datos SQL completa, una solución más simple para la escala del proyecto.
+    \item \textbf{Lógica Directa:} Las reglas de negocio, como el ajuste por edad, se implementan de forma legible y sin complejidad innecesaria.
+\end{itemize}
+\begin{lstlisting}[caption={Lógica KISS para el ajuste por edad en \texttt{GenerarRutinaServlet.java}}]
+// Ajuste por edad: Simple, directo y efectivo.
+if (edad > 50 && seriesYRepeticionesBase.startsWith("4")) {
+    seriesYRepeticionesBase = "3" + seriesYRepeticionesBase.substring(1);
+} else if (edad > 50 && seriesYRepeticionesBase.startsWith("5")) {
+     seriesYRepeticionesBase = "4" + seriesYRepeticionesBase.substring(1);
+}
+\end{lstlisting}
+
+\section{Principio DRY (Don't Repeat Yourself)}
+\subsection{Definición}
+El principio DRY establece que "cada pieza de conocimiento debe tener una representación única". En la práctica, significa evitar la duplicación de código.
+\subsection{Aplicación en MyGymJavaWeb}
+El ejemplo más claro es \texttt{JsonUtil}. En lugar de que cada servlet implemente su propia lógica para leer/escribir JSON, esta responsabilidad se abstrae en una única clase. Si necesitamos cambiar la persistencia, solo modificamos \texttt{JsonUtil}.
+\begin{lstlisting}[caption={Centralización de la lógica de persistencia en \texttt{JsonUtil.java}}]
+public class JsonUtil {
+    // ... rutas a los archivos JSON ...
+
+    public static List<Usuario> leerUsuarios(String realPath) throws IOException { /* ... */ }
+    public static void escribirUsuarios(List<Usuario> usuarios, String realPath) throws IOException { /* ... */ }
+    // ... otros métodos para ejercicios y rutinas ...
+}
+\end{lstlisting}
+
+\section{Principio YAGNI (You Ain't Gonna Need It)}
+\subsection{Definición}
+YAGNI establece que no se deben añadir funcionalidades hasta que no sean estrictamente necesarias, evitando la sobreingeniería.
+\subsection{Aplicación en MyGymJavaWeb}
+Se aplicó al construir la app de forma incremental. El seguimiento de progreso es un ejemplo: se implementó la versión más simple (guardar y marcar como completada) en lugar de un sistema complejo de registro de pesos que no se había solicitado.
+\begin{lstlisting}[caption={Modelo de datos simple en \texttt{RutinaGuardada.java} siguiendo YAGNI}]
+public class RutinaGuardada {
+    private long id;
+    private int usuarioId;
+    private Date fechaGuardada;
+    private String estado; // Solo "Guardada" o "Completada"
+    private Rutina rutina;
+
+    // No se añadieron campos como:
+    // private String comentariosUsuario;
+    // private Map<Integer, String> pesosLevantados;
+}
+\end{lstlisting}
+
+% --- NUEVOS PRINCIPIOS AÑADIDOS ---
+
+\section{Principio de Responsabilidad Única (Single Responsibility Principle - SRP)}
+\subsection{Definición}
+Este principio establece que una clase debe tener **una, y solo una, razón para cambiar**. Esto significa que cada clase debe tener una única responsabilidad o propósito bien definido.
+\subsection{Aplicación en MyGymJavaWeb}
+Nuestra arquitectura de servlets sigue este principio de forma natural. Cada servlet tiene una única responsabilidad:
+\begin{itemize}
+    \item \texttt{LoginServlet}: Su única razón para cambiar es si la lógica de autenticación se modifica. No se preocupa por el registro ni por la generación de rutinas.
+    \item \texttt{RegistroServlet}: Solo se encarga de crear nuevos usuarios.
+    \item \texttt{GenerarRutinaServlet}: Su única responsabilidad es la compleja lógica de negocio de crear un plan de entrenamiento.
+\end{itemize}
+Esta separación hace que el sistema sea mucho más fácil de entender y mantener. Si hay un error en el login, sabemos exactamente qué archivo revisar.
+\begin{lstlisting}[caption={\texttt{LoginServlet.java}, un ejemplo de SRP}]
+@WebServlet("/login")
+public class LoginServlet extends HttpServlet {
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
+        // Lógica exclusiva de autenticación...
+        // ... itera sobre los usuarios y verifica las credenciales ...
+
+        // Si tiene éxito:
+        // ... crea la sesión y redirige al dashboard ...
+
+        // Si falla:
+        // ... redirige de vuelta al login con un error ...
+    }
+}
+\end{lstlisting}
+
+\section{Principio de Inversión de Dependencias (Dependency Inversion Principle - DIP)}
+\subsection{Definición}
+El DIP establece que los módulos de alto nivel no deben depender de los módulos de bajo nivel; ambos deben depender de abstracciones. Además, las abstracciones no deben depender de los detalles, sino que los detalles deben depender de las abstracciones.
+\subsection{Aplicación en MyGymJavaWeb}
+Aunque no usamos interfaces explícitas, el espíritu del DIP está presente en la relación entre los Servlets (alto nivel) y \texttt{JsonUtil} (bajo nivel). Los servlets no saben \emph{cómo} se guardan los datos. No contienen código que manipule archivos, escriba bytes o parse JSON.
+La clase \texttt{JsonUtil} actúa como una **abstracción** sobre el mecanismo de persistencia. Los servlets solo dependen de los métodos públicos de \texttt{JsonUtil}. Si mañana decidimos cambiar la persistencia de JSON a una base de datos SQL, solo necesitaríamos re-implementar los métodos dentro de \texttt{JsonUtil} (o crear una nueva clase que cumpla el mismo "contrato") sin tener que cambiar una sola línea de código en nuestros servlets.
+\begin{lstlisting}[caption={Servlet dependiendo de la abstracción \texttt{JsonUtil}}]
+// Dentro de un Servlet (módulo de alto nivel)
+String realPath = getServletContext().getRealPath("/");
+
+// No sabe que esto es un archivo JSON. Solo llama a la abstracción.
+List<Usuario> usuarios = JsonUtil.leerUsuarios(realPath);
+
+// ... lógica de negocio ...
+
+// De nuevo, no le importa el mecanismo de guardado.
+JsonUtil.escribirUsuarios(usuarios, realPath);
+\end{lstlisting}
+
+\section{Separación de Conceptos (Separation of Concerns - SoC)}
+\subsection{Definición}
+Este es un principio de diseño más general que aboga por dividir un programa en secciones distintas, donde cada sección aborda una preocupación o responsabilidad separada. Es la base de muchos patrones de diseño, incluido el patrón Modelo-Vista-Controlador (MVC).
+\subsection{Aplicación en MyGymJavaWeb}
+Nuestra aplicación sigue una arquitectura MVC clásica, que es el ejemplo perfecto de SoC:
+\begin{itemize}
+    \item \textbf{Modelo (`com.agym.modelo`):} Se preocupa únicamente de representar los datos de la aplicación (Usuario, Ejercicio, etc.). No sabe cómo se muestran ni cómo se manipulan.
+    \item \textbf{Vista (`webapp`):} Se preocupa únicamente de la presentación de los datos al usuario (archivos JSP, HTML, CSS). No contiene lógica de negocio.
+    \item \textbf{Controlador (`com.agym.controlador`):} Actúa como el intermediario. Se preocupa de recibir las peticiones del usuario, interactuar con el Modelo para procesar datos y decidir qué Vista mostrar.
+\end{itemize}
+Esta separación es fundamental para la organización del proyecto. Por ejemplo, el \texttt{GenerarRutinaServlet} (Controlador) prepara los datos y luego simplemente los "pasa" a \texttt{rutina.jsp} (Vista) para que esta se encargue de mostrarlos.
+\begin{lstlisting}[caption={El Controlador delega la presentación a la Vista}]
+// Al final del doPost() en GenerarRutinaServlet (Controlador)
+
+// 1. Prepara los datos (atributos) para la Vista
+request.setAttribute("rutina", rutina);
+request.setAttribute("objetivoUsuario", usuario.getObjetivo());
+
+// 2. Delega la responsabilidad de renderizar a la Vista (rutina.jsp)
+request.getRequestDispatcher("rutina.jsp").forward(request, response);
+\end{lstlisting}
+
+\end{document}
