@@ -61,7 +61,7 @@ public class GenerarRutinaServlet extends HttpServlet {
 
     private Rutina generarRutinaLogica(Usuario usuario, List<Ejercicio> ejercicios) {
         Rutina rutina = new Rutina();
-        String seriesYRepeticiones = getSeriesYRepeticionesPorObjetivo(usuario.getObjetivo());
+        String seriesYRepeticiones = getSeriesYRepeticionesPorObjetivo(usuario.getObjetivo(), usuario.getExperiencia());
 
         switch (usuario.getDiasDisponibles()) {
             case 2:
@@ -114,14 +114,33 @@ public class GenerarRutinaServlet extends HttpServlet {
         return dia;
     }
 
-    private String getSeriesYRepeticionesPorObjetivo(String objetivo) {
+    private String getSeriesYRepeticionesPorObjetivo(String objetivo, String experiencia) {
+        boolean esPrincipiante = "principiante".equalsIgnoreCase(experiencia);
+        boolean esIntermedio = "intermedio".equalsIgnoreCase(experiencia);
+
         switch (objetivo) {
             case "bajar_peso":
-                return "3 series de 12-15 repeticiones";
+                if (esPrincipiante) {
+                    return "3 series de 15 repeticiones";
+                } else { // Intermedio o Avanzado
+                    return "4 series de 15-20 repeticiones";
+                }
             case "subir_peso":
-                return "4 series de 8-12 repeticiones";
+                if (esPrincipiante) {
+                    return "3 series de 8-12 repeticiones";
+                } else if (esIntermedio) {
+                    return "4 series de 8-12 repeticiones";
+                } else { // Avanzado
+                    return "5 series de 6-10 repeticiones";
+                }
             case "fortalecer":
-                return "5 series de 5-8 repeticiones";
+                if (esPrincipiante) {
+                    return "3 series de 5-8 repeticiones";
+                } else if (esIntermedio) {
+                    return "4 series de 4-6 repeticiones";
+                } else { // Avanzado
+                    return "5 series de 3-5 repeticiones";
+                }
             default:
                 return "3 series de 10 repeticiones";
         }
