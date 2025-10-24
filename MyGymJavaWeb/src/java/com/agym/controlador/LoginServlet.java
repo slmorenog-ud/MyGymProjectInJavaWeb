@@ -36,8 +36,8 @@ public class LoginServlet extends HttpServlet {
                 }
             }
 
-            // Si no se encuentra el usuario, redirigir al login
-            response.sendRedirect("login.html");
+            // Si no se encuentra el usuario, redirigir al login con un mensaje de error
+            response.sendRedirect("login.html?error=true");
 
         } catch (IOException e) {
             e.printStackTrace();

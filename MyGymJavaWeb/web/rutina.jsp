@@ -4,8 +4,19 @@
 <%@ page import="java.util.List" %>
 <%@ page import="com.agym.modelo.Rutina.DiaRutina" %>
 
+<%@ page import="java.util.Map" %>
+
 <%
     Rutina rutina = (Rutina) request.getAttribute("rutina");
+    String objetivo = (String) request.getAttribute("objetivoUsuario");
+
+    // Mapa para traducir los valores del objetivo a texto legible
+    Map<String, String> traduccionObjetivos = Map.of(
+        "bajar_peso", "Bajar de Peso",
+        "subir_peso", "Subir de Peso (Hipertrofia)",
+        "fortalecer", "Ganar Fuerza"
+    );
+    String objetivoLegible = traduccionObjetivos.getOrDefault(objetivo, "General");
 %>
 
 <!DOCTYPE html>
@@ -33,6 +44,9 @@
     <main>
         <div class="container">
             <h2>Aquí está tu rutina:</h2>
+            <% if (objetivo != null && !objetivo.isEmpty()) { %>
+                <h4 style="text-align: center; color: #2E4052; margin-top: -10px; margin-bottom: 25px;">Tu objetivo principal: <strong><%= objetivoLegible %></strong></h4>
+            <% } %>
 
             <% if (rutina != null && !rutina.getDias().isEmpty()) { %>
                 <% for (Rutina.DiaRutina dia : rutina.getDias()) { %>
