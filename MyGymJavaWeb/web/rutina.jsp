@@ -68,7 +68,12 @@
                 <p>No se pudo generar una rutina. Por favor, intenta de nuevo.</p>
             <% } %>
 
-            <a href="dashboard.jsp" class="btn">Volver al Panel</a>
+            <div class="actions-container" style="display: flex; justify-content: center; gap: 15px; margin-top: 20px;">
+                <a href="dashboard.jsp" class="btn btn-secondary">Volver al Panel</a>
+                <form action="guardarRutina" method="post" style="margin: 0;">
+                    <button type="submit" class="btn">Guardar Rutina</button>
+                </form>
+            </div>
         </div>
     </main>
 </body>

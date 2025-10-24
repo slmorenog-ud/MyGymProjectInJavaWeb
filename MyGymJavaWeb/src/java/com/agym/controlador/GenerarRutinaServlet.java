@@ -54,6 +54,9 @@ public class GenerarRutinaServlet extends HttpServlet {
 
         Rutina rutina = generarRutinaLogica(usuario, todosLosEjercicios);
 
+        // Guardar la rutina en la sesión para poder guardarla en el historial después
+        session.setAttribute("rutinaTemporal", rutina);
+
         request.setAttribute("rutina", rutina);
         request.setAttribute("objetivoUsuario", usuario.getObjetivo()); // <-- Añadido
         request.getRequestDispatcher("rutina.jsp").forward(request, response);

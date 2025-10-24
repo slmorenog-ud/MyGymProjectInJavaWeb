@@ -1,5 +1,8 @@
 package com.agym.util;
 
+import com.agym.modelo.Ejercicio;
+import com.agym.modelo.Rutina;
+import com.agym.modelo.RutinaGuardada;
 import com.agym.modelo.Usuario;
 import java.io.File;
 import java.io.FileWriter;
@@ -15,6 +18,7 @@ public class JsonUtil {
 
     private static final String USUARIOS_FILE_PATH = "WEB-INF/usuarios.json";
     private static final String EJERCICIOS_FILE_PATH = "WEB-INF/ejercicios.json";
+    private static final String RUTINAS_GUARDADAS_FILE_PATH = "WEB-INF/rutinas_guardadas.json";
 
     // --- Métodos para Usuarios ---
 
@@ -78,5 +82,85 @@ public class JsonUtil {
             }
         }
         return ejercicios;
+    }
+
+    // --- Métodos para Rutinas Guardadas ---
+
+    public static List<RutinaGuardada> leerRutinasGuardadas(String realPath) throws IOException {
+        List<RutinaGuardada> rutinasGuardadas = new ArrayList<>();
+        String jsonContent = new String(Files.readAllBytes(Paths.get(realPath, RUTINAS_GUARDADAS_FILE_PATH)));
+
+        if (!jsonContent.isEmpty()) {
+            JSONArray jsonArray = new JSONArray(jsonContent);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                RutinaGuardada rg = new RutinaGuardada();
+                rg.setId(jsonObject.getLong("id"));
+                rg.setUsuarioId(jsonObject.getInt("usuarioId"));
+                rg.setFechaGuardada(new java.util.Date(jsonObject.getLong("fechaGuardada")));
+                rg.setEstado(jsonObject.getString("estado"));
+
+                // Deserializar la rutina anidada
+                JSONObject rutinaJson = jsonObject.getJSONObject("rutina");
+                Rutina rutina = new Rutina();
+                JSONArray diasJson = rutinaJson.getJSONArray("dias");
+                for (int j = 0; j < diasJson.length(); j++) {
+                    JSONObject diaJson = diasJson.getJSONObject(j);
+                    Rutina.DiaRutina dia = new Rutina.DiaRutina(diaJson.getString("nombre"));
+                    JSONArray ejerciciosJson = diaJson.getJSONArray("ejercicios");
+                    for (int k = 0; k < ejerciciosJson.length(); k++) {
+                        JSONObject ejercicioJson = ejerciciosJson.getJSONObject(k);
+                        Ejercicio ej = new Ejercicio();
+                        ej.setNombre(ejercicioJson.getString("nombre"));
+                        ej.setDescripcion(ejercicioJson.getString("descripcion"));
+                        ej.setSeriesYRepeticiones(ejercicioJson.getString("seriesYRepeticiones"));
+                        ej.setImagenUrl(ejercicioJson.getString("imagenUrl"));
+                        dia.agregarEjercicio(ej);
+                    }
+                    rutina.agregarDia(dia);
+                }
+                rg.setRutina(rutina);
+                rutinasGuardadas.add(rg);
+            }
+        }
+        return rutinasGuardadas;
+    }
+
+    public static void escribirRutinasGuardadas(List<RutinaGuardada> rutinasGuardadas, String realPath) throws IOException {
+        JSONArray jsonArray = new JSONArray();
+        for (RutinaGuardada rg : rutinasGuardadas) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("id", rg.getId());
+            jsonObject.put("usuarioId", rg.getUsuarioId());
+            jsonObject.put("fechaGuardada", rg.getFechaGuardada().getTime());
+            jsonObject.put("estado", rg.getEstado());
+
+            // Serializar la rutina anidada
+            JSONObject rutinaJson = new JSONObject();
+            JSONArray diasJson = new JSONArray();
+            for (Rutina.DiaRutina dia : rg.getRutina().getDias()) {
+                JSONObject diaJson = new JSONObject();
+                diaJson.put("nombre", dia.getNombre());
+                JSONArray ejerciciosJson = new JSONArray();
+                for (Ejercicio ej : dia.getEjercicios()) {
+                    JSONObject ejercicioJson = new JSONObject();
+                    ejercicioJson.put("nombre", ej.getNombre());
+                    ejercicioJson.put("descripcion", ej.getDescripcion());
+                    ejercicioJson.put("seriesYRepeticiones", ej.getSeriesYRepeticiones());
+                    ejercicioJson.put("imagenUrl", ej.getImagenUrl());
+                    ejerciciosJson.put(ejercicioJson);
+                }
+                diaJson.put("ejercicios", ejerciciosJson);
+                diasJson.put(diaJson);
+            }
+            rutinaJson.put("dias", diasJson);
+            jsonObject.put("rutina", rutinaJson);
+
+            jsonArray.put(jsonObject);
+        }
+
+        try (FileWriter file = new FileWriter(new File(realPath, RUTINAS_GUARDADAS_FILE_PATH))) {
+            file.write(jsonArray.toString(4));
+        }
     }
 }

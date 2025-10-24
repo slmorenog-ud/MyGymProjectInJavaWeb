@@ -26,7 +26,11 @@
     <main>
         <div class="container">
             <h2>Hola, <%= usuario.getNombre() %>!</h2>
-            <p>Completa o actualiza tus datos para generar una rutina personalizada.</p>
+            <p>Completa o actualiza tus datos para generar una rutina personalizada o revisa tu historial.</p>
+
+            <div class="actions-container" style="text-align: center; margin-bottom: 25px;">
+                <a href="historial" class="btn btn-secondary">Mi Historial de Rutinas</a>
+            </div>
 
             <form action="generarRutina" method="post">
                 <label for="altura">Altura (cm):</label>
