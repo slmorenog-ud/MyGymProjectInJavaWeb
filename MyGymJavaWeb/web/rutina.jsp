@@ -11,9 +11,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Tu Rutina Personalizada - AGym</title>
+    <title>Tu Rutina Personalizada - MyGymJW</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
         .rutina-dia { margin-bottom: 30px; }
         .ejercicio { display: flex; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
@@ -25,7 +24,7 @@
 </head>
 <body>
     <header>
-        <h1><a href="dashboard.jsp">AGym</a></h1>
+        <h1><a href="dashboard.jsp">MyGymJW</a></h1>
         <nav>
             <a href="logout">Cerrar Sesión</a>
         </nav>

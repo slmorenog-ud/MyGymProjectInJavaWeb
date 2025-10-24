@@ -13,13 +13,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mi Panel - AGym</title>
+    <title>Mi Panel - MyGymJW</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
-        <h1><a href="index.html">AGym</a></h1>
+        <h1><a href="index.html">MyGymJW</a></h1>
         <nav>
             <a href="logout">Cerrar Sesión</a>
         </nav>

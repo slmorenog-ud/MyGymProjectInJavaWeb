@@ -1,0 +1,159 @@
+/* Fuentes de Google */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Inter:wght@400;700&display=swap');
+
+/* Variables de Color */
+:root {
+    --dark-blue: #2E4052;
+    --purple-dark: #412234;
+    --accent-yellow: #FFC857;
+    --light-green: #BDD9BF;
+    --white: #FFFFFF;
+}
+
+/* Estilos Generales */
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--light-green);
+    color: var(--dark-blue);
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Poppins', sans-serif;
+}
+
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Encabezado */
+header {
+    background-color: var(--dark-blue);
+    color: var(--white);
+    padding: 20px 40px;
+    text-align: center;
+    position: relative;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5em;
+}
+
+header h1 a {
+    color: var(--white);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+header h1 a:hover {
+    color: var(--accent-yellow);
+}
+
+/* Navegación */
+nav {
+    position: absolute;
+    top: 50%;
+    right: 40px;
+    transform: translateY(-50%);
+}
+
+nav a {
+    color: var(--white);
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 16px;
+    border: 1px solid var(--accent-yellow);
+    border-radius: 20px;
+    transition: background-color 0.3s, color 0.3s;
+}
+nav a:hover {
+    background-color: var(--accent-yellow);
+    color: var(--dark-blue);
+}
+
+/* Formularios */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-top: 20px;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="number"],
+select {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+}
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent-yellow);
+    box-shadow: 0 0 5px rgba(255, 200, 87, 0.5);
+}
+
+/* Botones */
+.btn {
+    display: inline-block;
+    padding: 14px 28px;
+    margin-top: 30px;
+    background-color: var(--purple-dark);
+    color: var(--white);
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: 'Poppins', sans-serif;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn:hover {
+    background-color: #5a3a4a; /* Un poco más claro que --purple-dark */
+    transform: translateY(-2px);
+}
+
+.cta-buttons {
+    text-align: center;
+    margin-top: 30px;
+}
+.cta-buttons .btn {
+    margin: 0 10px;
+}
+
+/* Enlaces */
+a {
+    color: var(--purple-dark);
+    text-decoration: none;
+    font-weight: bold;
+}
+a:hover {
+    text-decoration: underline;
+    color: var(--accent-yellow);
+}
+
+/* Estilos específicos de la página de rutina */
+.rutina-dia { margin-bottom: 30px; border-left: 3px solid var(--accent-yellow); padding-left: 20px; }
+.ejercicio { display: flex; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+.ejercicio img { width: 150px; height: 100px; object-fit: cover; margin-right: 20px; border-radius: 8px; border: 2px solid var(--light-green); }
+.ejercicio-info { flex-grow: 1; }
+.ejercicio-info h4 { margin: 0 0 10px 0; font-size: 1.4em; color: var(--dark-blue); }
+.ejercicio-info p { margin: 4px 0; line-height: 1.6; }
