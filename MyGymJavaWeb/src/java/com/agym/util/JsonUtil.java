@@ -14,6 +14,24 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+/**
+ * Clase de utilidad para manejar la persistencia de datos en archivos JSON.
+ * <p>
+ * Centraliza toda la lógica de lectura y escritura (serialización y
+ * deserialización) de las entidades del modelo, como {@link Usuario},
+ * {@link Ejercicio} y {@link RutinaGuardada}. Esto mantiene la lógica de
+ * acceso a datos separada del resto de la aplicación.
+ * </p>
+ * <p>
+ * <b>Principios de diseño aplicados:</b>
+ * - <b>Principio de Responsabilidad Única (SRP):</b> La única responsabilidad
+ *   de esta clase es la manipulación de archivos JSON. Si el mecanismo de
+ *   persistencia cambiara (ej. a una base de datos), esta sería la única
+ *   clase que necesitaría una refactorización mayor.
+ * - <b>Principio DRY (Don't Repeat Yourself):</b> Evita que la lógica de
+ *   lectura/escritura de JSON se repita en múltiples servlets.
+ * </p>
+ */
 public class JsonUtil {
 
     private static final String USUARIOS_FILE_PATH = "WEB-INF/usuarios.json";

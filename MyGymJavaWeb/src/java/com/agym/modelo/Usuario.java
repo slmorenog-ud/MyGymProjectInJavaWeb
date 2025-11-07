@@ -1,5 +1,13 @@
 package com.agym.modelo;
 
+/**
+ * Representa a un usuario en el sistema.
+ * <p>
+ * Esta clase es un Plain Old Java Object (POJO) que contiene toda la
+ * información personal y de entrenamiento de un usuario. Funciona como el
+ * modelo de datos principal para la entidad Usuario.
+ * </p>
+ */
 public class Usuario {
     private int id;
     private String nombre;

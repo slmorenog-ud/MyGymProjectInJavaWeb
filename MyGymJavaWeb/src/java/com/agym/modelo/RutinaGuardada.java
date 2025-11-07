@@ -2,6 +2,15 @@ package com.agym.modelo;
 
 import java.util.Date;
 
+/**
+ * Representa una instancia de una {@link Rutina} que ha sido guardada por un
+ * usuario en una fecha específica.
+ * <p>
+ * Esta clase actúa como una entidad de persistencia, vinculando una rutina
+ * a un usuario y añadiendo metadatos como la fecha de guardado y el estado
+ * (ej. "Guardada", "Completada").
+ * </p>
+ */
 public class RutinaGuardada {
     private long id; // ID único para cada rutina guardada
     private int usuarioId;
