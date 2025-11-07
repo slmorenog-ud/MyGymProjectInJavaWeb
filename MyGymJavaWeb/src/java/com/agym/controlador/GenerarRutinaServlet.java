@@ -50,10 +50,10 @@ public class GenerarRutinaServlet extends HttpServlet {
 
         usuario.setAltura(Double.parseDouble(request.getParameter("altura")));
         usuario.setPeso(Double.parseDouble(request.getParameter("peso")));
-        usuario.setExperiencia(request.getParameter("experiencia")));
+        usuario.setExperiencia(request.getParameter("experiencia"));
         usuario.setDiasDisponibles(Integer.parseInt(request.getParameter("dias")));
-        usuario.setObjetivo(request.getParameter("objetivo")));
-        usuario.setPrioridadMuscular(request.getParameter("prioridadMuscular")));
+        usuario.setObjetivo(request.getParameter("objetivo"));
+        usuario.setPrioridadMuscular(request.getParameter("prioridadMuscular"));
 
         String realPath = getServletContext().getRealPath("/");
         List<Usuario> usuarios = JsonUtil.leerUsuarios(realPath);
