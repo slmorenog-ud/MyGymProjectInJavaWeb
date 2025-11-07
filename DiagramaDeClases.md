@@ -1,18 +1,31 @@
-```mermaid
 classDiagram
     direction TB
 
-    subgraph "1. Presentation Layer (Servlets)"
+    subgraph Presentation_Layer
         class HttpServlet {
             <<Abstract>>
         }
-        class RegistroServlet { +doPost() }
-        class LoginServlet { +doPost() }
-        class GenerarRutinaServlet { +doPost() }
-        class GuardarRutinaServlet { +doPost() }
-        class HistorialServlet { +doGet() }
-        class MarcarCompletadaServlet { +doPost() }
-        class LogoutServlet { +doPost() }
+        class RegistroServlet {
+            +doPost()
+        }
+        class LoginServlet {
+            +doPost()
+        }
+        class GenerarRutinaServlet {
+            +doPost()
+        }
+        class GuardarRutinaServlet {
+            +doPost()
+        }
+        class HistorialServlet {
+            +doGet()
+        }
+        class MarcarCompletadaServlet {
+            +doPost()
+        }
+        class LogoutServlet {
+            +doPost()
+        }
 
         HttpServlet <|-- RegistroServlet
         HttpServlet <|-- LoginServlet
@@ -23,7 +36,7 @@ classDiagram
         HttpServlet <|-- LogoutServlet
     end
 
-    subgraph "2. Business Logic Layer"
+    subgraph Business_Logic_Layer
         class GeneradorRutinaFactory {
             <<Factory>>
             +getGenerador(int) GeneradorRutinaBase
@@ -42,7 +55,7 @@ classDiagram
         GeneradorRutinaBase <|-- GeneradorRutina4Dias
     end
 
-    subgraph "3. Data Access & Utility"
+    subgraph Data_Access_Utility
         class JsonUtil {
             <<Utility>>
             +leerUsuarios() List~Usuario~
@@ -53,7 +66,7 @@ classDiagram
         }
     end
 
-    subgraph "4. Model Layer"
+    subgraph Model_Layer
         class Usuario {
             -int id
             -String nombre
@@ -84,31 +97,35 @@ classDiagram
         }
     end
 
-    ' --- Relationships ---
-    GenerarRutinaServlet ..> GeneradorRutinaFactory : uses
-    GeneradorRutinaFactory ..> GeneradorRutinaBase : creates
+    %% --- Relationships ---
 
-    ' --- Servlet Dependencies ---
-    RegistroServlet ..> JsonUtil : uses
-    LoginServlet ..> JsonUtil : uses
-    GenerarRutinaServlet ..> JsonUtil : uses
-    GuardarRutinaServlet ..> JsonUtil : uses
-    HistorialServlet ..> JsonUtil : uses
-    MarcarCompletadaServlet ..> JsonUtil : uses
+    %% Presentation -> Logic
+    GenerarRutinaServlet --> GeneradorRutinaFactory
 
-    GenerarRutinaServlet ..> Usuario : updates
-    GenerarRutinaServlet ..> Rutina : creates
-    GuardarRutinaServlet ..> RutinaGuardada : creates
-    HistorialServlet ..> RutinaGuardada : reads
+    %% Logic -> Logic
+    GeneradorRutinaFactory --> GeneradorRutinaBase
 
-    ' --- Logic Dependencies ---
-    GeneradorRutinaBase ..> Usuario : reads data from
-    GeneradorRutinaBase ..> Ejercicio : selects
-    GeneradorRutinaBase ..> Rutina : populates
+    %% Presentation -> Data/Utility
+    RegistroServlet --> JsonUtil
+    LoginServlet --> JsonUtil
+    GenerarRutinaServlet --> JsonUtil
+    GuardarRutinaServlet --> JsonUtil
+    HistorialServlet --> JsonUtil
+    MarcarCompletadaServlet --> JsonUtil
 
-    ' --- Model Composition ---
-    Rutina "1" *-- "1..*" DiaRutina : contains
-    DiaRutina "1" *-- "1..*" Ejercicio : contains
-    RutinaGuardada o-- "1" Rutina : encapsulates
-    RutinaGuardada "1" -- "1" Usuario : belongs to
-```
+    %% Presentation -> Model
+    GenerarRutinaServlet --> Usuario
+    GuardarRutinaServlet --> RutinaGuardada
+    HistorialServlet --> RutinaGuardada
+    MarcarCompletadaServlet --> RutinaGuardada
+
+    %% Logic -> Model
+    GeneradorRutinaBase --> Usuario
+    GeneradorRutinaBase --> Ejercicio
+    GeneradorRutinaBase --> Rutina
+
+    %% Model -> Model (Composition & Aggregation)
+    Rutina "1" *-- "1..*" DiaRutina
+    DiaRutina "1" *-- "1..*" Ejercicio
+    RutinaGuardada o-- "1" Rutina
+    RutinaGuardada --> Usuario
