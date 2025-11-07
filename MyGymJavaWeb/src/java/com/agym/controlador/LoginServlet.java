@@ -11,9 +11,31 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Servlet que maneja la autenticación de usuarios.
+ * <p>
+ * Su responsabilidad se centra en verificar las credenciales (email y contraseña)
+ * contra la lista de usuarios persistidos. Si la autenticación es exitosa,
+ * crea una sesión HTTP para el usuario.
+ * </p>
+ * <p>
+ * <b>Principios de diseño aplicados:</b>
+ * - <b>Principio de Responsabilidad Única (SRP):</b> Esta clase tiene una única
+ *   responsabilidad: la lógica de inicio de sesión. No se ocupa del registro
+ *   de usuarios ni de ninguna otra funcionalidad de la aplicación.
+ * </p>
+ */
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
+    /**
+     * Procesa las solicitudes HTTP <code>POST</code> para la autenticación de usuarios.
+     *
+     * @param request  objeto que contiene la solicitud del cliente.
+     * @param response objeto que contiene la respuesta que el servlet envía al cliente.
+     * @throws ServletException si ocurre un error específico del servlet.
+     * @throws IOException si ocurre un error de entrada/salida.
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

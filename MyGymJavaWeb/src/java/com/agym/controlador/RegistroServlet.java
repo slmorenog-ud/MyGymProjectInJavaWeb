@@ -10,9 +10,31 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Servlet encargado de gestionar el registro de nuevos usuarios.
+ * <p>
+ * Su única responsabilidad es recibir los datos del formulario de registro,
+ * validar la información (como la existencia del email), crear un nuevo objeto
+ * {@link Usuario}, y persistirlo utilizando {@link JsonUtil}.
+ * </p>
+ * <p>
+ * <b>Principios de diseño aplicados:</b>
+ * - <b>Principio de Responsabilidad Única (SRP):</b> Esta clase tiene una sola
+ *   razón para cambiar: la lógica de registro de usuarios. No se encarga del
+ *   login, la generación de rutinas ni otras funcionalidades.
+ * </p>
+ */
 @WebServlet("/registro")
 public class RegistroServlet extends HttpServlet {
 
+    /**
+     * Procesa las solicitudes HTTP <code>POST</code> para el registro de usuarios.
+     *
+     * @param request  objeto que contiene la solicitud del cliente.
+     * @param response objeto que contiene la respuesta que el servlet envía al cliente.
+     * @throws ServletException si ocurre un error específico del servlet.
+     * @throws IOException si ocurre un error de entrada/salida.
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

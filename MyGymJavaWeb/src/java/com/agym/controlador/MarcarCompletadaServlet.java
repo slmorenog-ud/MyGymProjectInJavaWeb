@@ -13,9 +13,29 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Servlet que gestiona la acción de marcar una rutina como "Completada".
+ * <p>
+ * Su única responsabilidad es recibir el ID de una rutina guardada,
+ * encontrarla en la persistencia y actualizar su estado.
+ * </p>
+ * <p>
+ * <b>Principios de diseño aplicados:</b>
+ * - <b>Principio de Responsabilidad Única (SRP):</b> Esta clase tiene una sola
+ *   razón para cambiar: la lógica para actualizar el estado de una rutina.
+ * </p>
+ */
 @WebServlet("/marcarCompletada")
 public class MarcarCompletadaServlet extends HttpServlet {
 
+    /**
+     * Procesa las solicitudes HTTP <code>POST</code> para marcar una rutina como completada.
+     *
+     * @param request  objeto que contiene la solicitud del cliente.
+     * @param response objeto que contiene la respuesta que el servlet envía al cliente.
+     * @throws ServletException si ocurre un error específico del servlet.
+     * @throws IOException si ocurre un error de entrada/salida.
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
