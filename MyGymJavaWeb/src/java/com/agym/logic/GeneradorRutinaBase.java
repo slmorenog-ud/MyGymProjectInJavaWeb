@@ -10,9 +10,31 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Clase base abstracta para la generación de rutinas de entrenamiento.
+ * Utiliza el patrón de diseño Template Method para definir el esqueleto de la
+ * generación de una rutina, permitiendo que las subclases definan la estructura específica.
+ *
+ * Principios de diseño aplicados:
+ * - Principio de Abierto/Cerrado (OCP): Se pueden añadir nuevos tipos de rutinas
+ *   (ej. para 5 días) creando nuevas subclases sin modificar esta clase base.
+ * - Principio de Sustitución de Liskov (LSP): Cualquier subclase de
+ *   {@code GeneradorRutinaBase} puede ser utilizada por el cliente (servlet) sin
+ *   alterar el comportamiento esperado.
+ * - Principio DRY (Don't Repeat Yourself): La lógica común (cálculo de edad,
+ *   series/repeticiones, etc.) está centralizada aquí.
+ */
 public abstract class GeneradorRutinaBase {
 
-    // Template Method
+    /**
+     * Método plantilla (Template Method) que define el algoritmo para generar una rutina.
+     * Orquesta la lógica común y delega la construcción específica de los días
+     * de la rutina al método abstracto {@code construirRutina}.
+     *
+     * @param usuario El usuario para quien se genera la rutina.
+     * @param todosLosEjercicios La lista completa de ejercicios disponibles.
+     * @return Una {@link Rutina} personalizada.
+     */
     public final Rutina generar(Usuario usuario, List<Ejercicio> todosLosEjercicios) {
         Rutina rutina = new Rutina();
         int edad = calcularEdad(usuario.getFechaNacimiento());
