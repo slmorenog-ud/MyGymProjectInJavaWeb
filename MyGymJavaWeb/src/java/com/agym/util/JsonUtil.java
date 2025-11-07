@@ -16,21 +16,14 @@ import org.json.JSONObject;
 
 /**
  * Clase de utilidad para manejar la persistencia de datos en archivos JSON.
- * <p>
- * Centraliza toda la lógica de lectura y escritura (serialización y
- * deserialización) de las entidades del modelo, como {@link Usuario},
- * {@link Ejercicio} y {@link RutinaGuardada}. Esto mantiene la lógica de
- * acceso a datos separada del resto de la aplicación.
- * </p>
- * <p>
- * <b>Principios de diseño aplicados:</b>
- * - <b>Principio de Responsabilidad Única (SRP):</b> La única responsabilidad
- *   de esta clase es la manipulación de archivos JSON. Si el mecanismo de
- *   persistencia cambiara (ej. a una base de datos), esta sería la única
- *   clase que necesitaría una refactorización mayor.
- * - <b>Principio DRY (Don't Repeat Yourself):</b> Evita que la lógica de
- *   lectura/escritura de JSON se repita en múltiples servlets.
- * </p>
+ * Centraliza toda la lógica de serialización y deserialización.
+ *
+ * --- Principios de Diseño Clave ---
+ * SRP (Single Responsibility Principle): Su única responsabilidad es la
+ * manipulación de archivos JSON. Si la persistencia cambiara a una base
+ * de datos, esta sería la única clase a modificar.
+ * DRY (Don't Repeat Yourself): Evita repetir la lógica de acceso a JSON
+ * en múltiples servlets.
  */
 public class JsonUtil {
 
@@ -38,8 +31,9 @@ public class JsonUtil {
     private static final String EJERCICIOS_FILE_PATH = "WEB-INF/ejercicios.json";
     private static final String RUTINAS_GUARDADAS_FILE_PATH = "WEB-INF/rutinas_guardadas.json";
 
-    // --- Métodos para Usuarios ---
+    // Principio: KISS - Métodos estáticos simples y directos para cada operación.
 
+    // --- Métodos para Usuarios ---
     public static List<Usuario> leerUsuarios(String realPath) throws IOException {
         List<Usuario> usuarios = new ArrayList<>();
         String jsonContent = new String(Files.readAllBytes(Paths.get(realPath, USUARIOS_FILE_PATH)));
@@ -55,7 +49,7 @@ public class JsonUtil {
                 usuario.setPassword(jsonObject.optString("password"));
                 usuario.setFechaNacimiento(jsonObject.optString("fechaNacimiento"));
                 usuario.setGenero(jsonObject.optString("genero"));
-                usuario.setPrioridadMuscular(jsonObject.optString("prioridadMuscular", "sin_preferencia")); // Valor por defecto
+                usuario.setPrioridadMuscular(jsonObject.optString("prioridadMuscular", "sin_preferencia"));
                 usuarios.add(usuario);
             }
         }
@@ -77,12 +71,11 @@ public class JsonUtil {
         }
 
         try (FileWriter file = new FileWriter(new File(realPath, USUARIOS_FILE_PATH))) {
-            file.write(jsonArray.toString(4)); // El 4 es para indentar el JSON y hacerlo legible
+            file.write(jsonArray.toString(4));
         }
     }
 
     // --- Métodos para Ejercicios ---
-
     public static List<com.agym.modelo.Ejercicio> leerEjercicios(String realPath) throws IOException {
         List<com.agym.modelo.Ejercicio> ejercicios = new ArrayList<>();
         String jsonContent = new String(Files.readAllBytes(Paths.get(realPath, EJERCICIOS_FILE_PATH)));
@@ -105,7 +98,6 @@ public class JsonUtil {
     }
 
     // --- Métodos para Rutinas Guardadas ---
-
     public static List<RutinaGuardada> leerRutinasGuardadas(String realPath) throws IOException {
         List<RutinaGuardada> rutinasGuardadas = new ArrayList<>();
         String jsonContent = new String(Files.readAllBytes(Paths.get(realPath, RUTINAS_GUARDADAS_FILE_PATH)));
@@ -120,7 +112,6 @@ public class JsonUtil {
                 rg.setFechaGuardada(new java.util.Date(jsonObject.getLong("fechaGuardada")));
                 rg.setEstado(jsonObject.getString("estado"));
 
-                // Deserializar la rutina anidada
                 JSONObject rutinaJson = jsonObject.getJSONObject("rutina");
                 Rutina rutina = new Rutina();
                 JSONArray diasJson = rutinaJson.getJSONArray("dias");
@@ -155,7 +146,6 @@ public class JsonUtil {
             jsonObject.put("fechaGuardada", rg.getFechaGuardada().getTime());
             jsonObject.put("estado", rg.getEstado());
 
-            // Serializar la rutina anidada
             JSONObject rutinaJson = new JSONObject();
             JSONArray diasJson = new JSONArray();
             for (Rutina.DiaRutina dia : rg.getRutina().getDias()) {

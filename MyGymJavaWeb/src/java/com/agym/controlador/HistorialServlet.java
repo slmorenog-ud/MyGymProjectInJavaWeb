@@ -15,29 +15,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Servlet encargado de mostrar el historial de rutinas guardadas por el usuario.
- * <p>
- * Su única responsabilidad es leer las rutinas guardadas, filtrarlas para
- * obtener las que pertenecen al usuario actual en sesión, y enviarlas a la
- * vista {@code historial.jsp} para su visualización.
- * </p>
- * <p>
- * <b>Principios de diseño aplicados:</b>
- * - <b>Principio de Responsabilidad Única (SRP):</b> Esta clase tiene una sola
- *   razón para cambiar: la lógica de visualización del historial.
- * </p>
+ * Servlet para mostrar el historial de rutinas guardadas del usuario.
+ * Su única responsabilidad es leer y mostrar el historial.
+ *
+ * --- Principios de Diseño Clave ---
+ * SRP (Single Responsibility Principle): Solo muestra el historial.
  */
 @WebServlet("/historial")
 public class HistorialServlet extends HttpServlet {
 
     /**
-     * Procesa las solicitudes HTTP <code>GET</code> para mostrar el historial.
-     *
-     * @param request  objeto que contiene la solicitud del cliente.
-     * @param response objeto que contiene la respuesta que el servlet envía al cliente.
-     * @throws ServletException si ocurre un error específico del servlet.
-     * @throws IOException si ocurre un error de entrada/salida.
+     * Procesa la solicitud GET para mostrar el historial.
      */
+    // Principio: SRP / SoC
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -51,11 +41,10 @@ public class HistorialServlet extends HttpServlet {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         String realPath = getServletContext().getRealPath("/");
 
-        // Leer todas las rutinas y filtrar por el ID del usuario
         List<RutinaGuardada> todasLasRutinas = JsonUtil.leerRutinasGuardadas(realPath);
         List<RutinaGuardada> rutinasDelUsuario = todasLasRutinas.stream()
                 .filter(rg -> rg.getUsuarioId() == usuario.getId())
-                .sorted((r1, r2) -> r2.getFechaGuardada().compareTo(r1.getFechaGuardada())) // Ordenar por fecha, más reciente primero
+                .sorted((r1, r2) -> r2.getFechaGuardada().compareTo(r1.getFechaGuardada()))
                 .collect(Collectors.toList());
 
         request.setAttribute("historialRutinas", rutinasDelUsuario);

@@ -10,38 +10,28 @@ import java.io.IOException;
 
 /**
  * Servlet que gestiona el cierre de sesión de un usuario.
- * <p>
- * Su única responsabilidad es invalidar la sesión HTTP actual del usuario
- * y redirigirlo a la página de inicio.
- * </p>
- * <p>
- * <b>Principios de diseño aplicados:</b>
- * - <b>Principio de Responsabilidad Única (SRP):</b> Esta clase tiene una sola
- *   razón para cambiar: la lógica de cierre de sesión.
- * </p>
+ * Su única responsabilidad es invalidar la sesión HTTP del usuario.
+ *
+ * --- Principios de Diseño Clave ---
+ * SRP (Single Responsibility Principle): Solo se encarga del logout.
  */
 @WebServlet("/logout")
 public class LogoutServlet extends HttpServlet {
 
     /**
-     * Procesa las solicitudes HTTP <code>POST</code> para el cierre de sesión.
-     * Se utiliza POST en lugar de GET por seguridad y buenas prácticas, ya que
-     * esta acción cambia el estado del servidor (invalida la sesión).
-     *
-     * @param request  objeto que contiene la solicitud del cliente.
-     * @param response objeto que contiene la respuesta que el servlet envía al cliente.
-     * @throws ServletException si ocurre un error específico del servlet.
-     * @throws IOException si ocurre un error de entrada/salida.
+     * Procesa la solicitud POST para el cierre de sesión. Se usa POST
+     * porque esta acción cambia el estado del servidor (invalida la sesión).
      */
+    // Principio: SRP / SoC
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = request.getSession(false); // No crear una nueva sesión si no existe
+        HttpSession session = request.getSession(false);
         if (session != null) {
-            session.invalidate(); // Invalida la sesión
+            session.invalidate();
         }
 
-        response.sendRedirect("index.html"); // Redirige a la página de inicio
+        response.sendRedirect("index.html");
     }
 }

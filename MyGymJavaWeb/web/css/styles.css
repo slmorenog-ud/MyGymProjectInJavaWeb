@@ -157,3 +157,24 @@ a:hover {
 .ejercicio-info { flex-grow: 1; }
 .ejercicio-info h4 { margin: 0 0 10px 0; font-size: 1.4em; color: var(--dark-blue); }
 .ejercicio-info p { margin: 4px 0; line-height: 1.6; }
+
+/* Estilo para que un botón parezca un enlace en la navegación */
+.link-button {
+    background: none;
+    border: none;
+    color: var(--white);
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 16px;
+    border: 1px solid var(--accent-yellow);
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 1em;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.link-button:hover {
+    background-color: var(--accent-yellow);
+    color: var(--dark-blue);
+}
