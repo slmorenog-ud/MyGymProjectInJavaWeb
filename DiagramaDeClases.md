@@ -1,31 +1,18 @@
+```mermaid
 classDiagram
     direction TB
 
-    subgraph Presentation_Layer
+    subgraph "Controlador (Capa de Presentación)"
         class HttpServlet {
             <<Abstract>>
         }
-        class RegistroServlet {
-            +doPost()
-        }
-        class LoginServlet {
-            +doPost()
-        }
-        class GenerarRutinaServlet {
-            +doPost()
-        }
-        class GuardarRutinaServlet {
-            +doPost()
-        }
-        class HistorialServlet {
-            +doGet()
-        }
-        class MarcarCompletadaServlet {
-            +doPost()
-        }
-        class LogoutServlet {
-            +doPost()
-        }
+        class RegistroServlet
+        class LoginServlet
+        class GenerarRutinaServlet
+        class GuardarRutinaServlet
+        class HistorialServlet
+        class MarcarCompletadaServlet
+        class LogoutServlet
 
         HttpServlet <|-- RegistroServlet
         HttpServlet <|-- LoginServlet
@@ -36,7 +23,7 @@ classDiagram
         HttpServlet <|-- LogoutServlet
     end
 
-    subgraph Business_Logic_Layer
+    subgraph "Lógica de Negocio"
         class GeneradorRutinaFactory {
             <<Factory>>
             +getGenerador(int) GeneradorRutinaBase
@@ -44,8 +31,9 @@ classDiagram
         class GeneradorRutinaBase {
             <<Abstract>>
             +generar(Usuario, List~Ejercicio~) Rutina
-            #construirRutina(...)
+            #construirRutina(Rutina, ...) void
         }
+        note for GeneradorRutinaBase "generar() es el <<Template Method>>"
         class GeneradorRutina2Dias
         class GeneradorRutina3Dias
         class GeneradorRutina4Dias
@@ -55,25 +43,30 @@ classDiagram
         GeneradorRutinaBase <|-- GeneradorRutina4Dias
     end
 
-    subgraph Data_Access_Utility
+    subgraph "Utilidades y Acceso a Datos"
         class JsonUtil {
             <<Utility>>
             +leerUsuarios() List~Usuario~
             +escribirUsuarios(List~Usuario~)
             +leerEjercicios() List~Ejercicio~
-            +leerRutinasGuardadas() List~RutinaGuardada~
-            +escribirRutinasGuardadas(List~RutinaGuardada~)
+            +escribirRutinasGuardadas(...)
         }
     end
 
-    subgraph Model_Layer
+    subgraph "Modelo (Capa de Datos)"
         class Usuario {
             -int id
             -String nombre
             -String email
             -String password
-            -int diasDisponibles
+            -String fechaNacimiento
+            -String genero
+            -double altura
+            -double peso
+            -String experiencia
             -String objetivo
+            -int diasDisponibles
+            -String prioridadMuscular
         }
         class Rutina {
             -List~DiaRutina~ dias
@@ -94,30 +87,29 @@ classDiagram
             -int usuarioId
             -Date fechaGuardada
             -Rutina rutina
+            -String estado
         }
     end
 
-    %% --- Relationships ---
+    %% --- Relaciones Clave de Diseño ---
 
-    %% Presentation -> Logic
-    GenerarRutinaServlet --> GeneradorRutinaFactory
+    %% Presentation -> Logic (DIP & Factory Usage)
+    GenerarRutinaServlet ..> GeneradorRutinaBase : "<< uses >> (DIP)"
+    GenerarRutinaServlet ..> GeneradorRutinaFactory : "<< uses >>"
 
-    %% Logic -> Logic
-    GeneradorRutinaFactory --> GeneradorRutinaBase
+    %% Logic -> Logic (Factory Creates Concrete Implementations)
+    GeneradorRutinaFactory ..> GeneradorRutina2Dias : "<< creates >>"
+    GeneradorRutinaFactory ..> GeneradorRutina3Dias : "<< creates >>"
+    GeneradorRutinaFactory ..> GeneradorRutina4Dias : "<< creates >>"
 
-    %% Presentation -> Data/Utility
+    %% Generic Dependencies (Controller -> Utility/Model)
     RegistroServlet --> JsonUtil
     LoginServlet --> JsonUtil
     GenerarRutinaServlet --> JsonUtil
     GuardarRutinaServlet --> JsonUtil
     HistorialServlet --> JsonUtil
     MarcarCompletadaServlet --> JsonUtil
-
-    %% Presentation -> Model
     GenerarRutinaServlet --> Usuario
-    GuardarRutinaServlet --> RutinaGuardada
-    HistorialServlet --> RutinaGuardada
-    MarcarCompletadaServlet --> RutinaGuardada
 
     %% Logic -> Model
     GeneradorRutinaBase --> Usuario
@@ -125,7 +117,9 @@ classDiagram
     GeneradorRutinaBase --> Rutina
 
     %% Model -> Model (Composition & Aggregation)
-    Rutina "1" *-- "1..*" DiaRutina
-    DiaRutina "1" *-- "1..*" Ejercicio
-    RutinaGuardada o-- "1" Rutina
-    RutinaGuardada --> Usuario
+    Rutina "1" *-- "1..*" DiaRutina : contiene
+    DiaRutina "1" *-- "1..*" Ejercicio : contiene
+    RutinaGuardada o-- "1" Rutina : guarda
+    RutinaGuardada --> Usuario : "pertenece a"
+
+```
