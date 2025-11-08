@@ -3,31 +3,60 @@ graph TD
     direction LR
 
     subgraph "Capa de Vista (Interfaz de Usuario)"
-        Vista["JSPs, HTML, CSS"]
+        Vista[
+            <b>Contenido Web</b><br/>
+            JSPs<br/>
+            HTML<br/>
+            CSS
+        ]
     end
 
     subgraph "Capa de Controlador (com.agym.controlador)"
-        Controlador["Servlets"]
+        Controlador[
+            <b>Servlets Principales</b><br/>
+            LoginServlet<br/>
+            RegistroServlet<br/>
+            GenerarRutinaServlet<br/>
+            GuardarRutinaServlet<br/>
+            HistorialServlet<br/>
+            LogoutServlet
+        ]
     end
 
     subgraph "Capa de Lógica de Negocio (com.agym.logic)"
-        Logica["Generadores de Rutina"]
+        Logica[
+            <b>Generación de Rutinas</b><br/>
+            GeneradorRutinaFactory<br/>
+            GeneradorRutinaBase<br/>
+            GeneradorRutina2Dias<br/>
+            GeneradorRutina3Dias<br/>
+            GeneradorRutina4Dias
+        ]
     end
 
     subgraph "Capa de Utilidades (com.agym.util)"
-        Utilidades["JsonUtil"]
+        Utilidades[
+            <b>Persistencia</b><br/>
+            JsonUtil
+        ]
     end
 
     subgraph "Capa de Modelo (com.agym.modelo)"
-        Modelo["POJOs: Usuario, Rutina, etc."]
+        Modelo[
+            <b>Entidades (POJOs)</b><br/>
+            Usuario<br/>
+            Rutina<br/>
+            Ejercicio<br/>
+            RutinaGuardada
+        ]
     end
 
     %% --- Dependencias entre Capas ---
-    Controlador --> Logica
-    Controlador --> Utilidades
-    Controlador --> Modelo
-    Controlador -- "Redirige a / Despacha" --> Vista
+    Controlador -- "Usa" --> Logica
+    Controlador -- "Usa" --> Utilidades
+    Controlador -- "Usa y Manipula" --> Modelo
+    Controlador -- "Redirige / Despacha a" --> Vista
 
-    Logica --> Modelo
-    Utilidades --> Modelo
+    Logica -- "Usa y Crea" --> Modelo
+    Utilidades -- "Lee / Escribe" --> Modelo
 ```
