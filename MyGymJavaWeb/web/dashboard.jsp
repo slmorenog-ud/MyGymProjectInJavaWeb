@@ -20,7 +20,9 @@
     <header>
         <h1><a href="index.html">MyGymJW</a></h1>
         <nav>
-            <a href="logout">Cerrar Sesión</a>
+            <form action="logout" method="post" style="display:inline;">
+                <button type="submit" class="link-button">Cerrar Sesión</button>
+            </form>
         </nav>
     </header>
     <main>

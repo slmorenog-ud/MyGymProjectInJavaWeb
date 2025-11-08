@@ -2,12 +2,7 @@ package com.agym.modelo;
 
 /**
  * Representa un ejercicio de entrenamiento.
- * <p>
- * Esta clase POJO contiene toda la información estática de un ejercicio, como
- * su nombre, descripción, grupo muscular, etc. También incluye un campo
- * {@code seriesYRepeticiones} que se asigna dinámicamente cuando el ejercicio
- * se incluye en una rutina generada.
- * </p>
+ * POJO con la información estática y dinámica (series/reps) de un ejercicio.
  */
 public class Ejercicio {
     private int id;
@@ -16,9 +11,10 @@ public class Ejercicio {
     private String grupoMuscular;
     private String dificultad;
     private String imagenUrl;
-    private String seriesYRepeticiones; // Campo para almacenar las series y repeticiones personalizadas
+    private String seriesYRepeticiones; // Asignado dinámicamente al generar la rutina
 
     // Getters y Setters
+    // Principio: KISS
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getNombre() { return nombre; }

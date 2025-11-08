@@ -11,30 +11,19 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Servlet encargado de gestionar el registro de nuevos usuarios.
- * <p>
- * Su única responsabilidad es recibir los datos del formulario de registro,
- * validar la información (como la existencia del email), crear un nuevo objeto
- * {@link Usuario}, y persistirlo utilizando {@link JsonUtil}.
- * </p>
- * <p>
- * <b>Principios de diseño aplicados:</b>
- * - <b>Principio de Responsabilidad Única (SRP):</b> Esta clase tiene una sola
- *   razón para cambiar: la lógica de registro de usuarios. No se encarga del
- *   login, la generación de rutinas ni otras funcionalidades.
- * </p>
+ * Servlet que gestiona el registro de nuevos usuarios.
+ * Su única responsabilidad es procesar la solicitud de registro.
+ *
+ * --- Principios de Diseño Clave ---
+ * SRP (Single Responsibility Principle): Solo se encarga del registro.
  */
 @WebServlet("/registro")
 public class RegistroServlet extends HttpServlet {
 
     /**
-     * Procesa las solicitudes HTTP <code>POST</code> para el registro de usuarios.
-     *
-     * @param request  objeto que contiene la solicitud del cliente.
-     * @param response objeto que contiene la respuesta que el servlet envía al cliente.
-     * @throws ServletException si ocurre un error específico del servlet.
-     * @throws IOException si ocurre un error de entrada/salida.
+     * Procesa la solicitud POST para el registro de usuarios.
      */
+    // Principio: SRP / SoC
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -50,28 +39,20 @@ public class RegistroServlet extends HttpServlet {
         try {
             List<Usuario> usuarios = JsonUtil.leerUsuarios(realPath);
 
-            // Verificar si el email ya existe
             for (Usuario u : usuarios) {
                 if (u.getEmail().equalsIgnoreCase(email)) {
-                    // Aquí podríamos enviar un mensaje de error a la vista
-                    response.sendRedirect("register.html"); // Redirección simple por ahora
+                    response.sendRedirect("register.html");
                     return;
                 }
             }
 
-            // Crear nuevo usuario y asignar un ID único
-            int maxId = usuarios.stream()
-                                .mapToInt(Usuario::getId)
-                                .max()
-                                .orElse(0);
+            int maxId = usuarios.stream().mapToInt(Usuario::getId).max().orElse(0);
 
             Usuario nuevoUsuario = new Usuario();
             nuevoUsuario.setId(maxId + 1);
             nuevoUsuario.setNombre(nombre);
             nuevoUsuario.setEmail(email);
-            // TODO: ¡Vulnerabilidad de seguridad! Las contraseñas se guardan en texto plano.
-            // Se debe implementar un hash de contraseñas (ej. jBcrypt) antes de pasar a producción.
-            nuevoUsuario.setPassword(password);
+            nuevoUsuario.setPassword(password); // TODO: Hash passwords
             nuevoUsuario.setFechaNacimiento(fechaNacimiento);
             nuevoUsuario.setGenero(genero);
 
@@ -81,7 +62,6 @@ public class RegistroServlet extends HttpServlet {
             response.sendRedirect("login.html");
 
         } catch (IOException e) {
-            // Manejo de errores
             e.printStackTrace();
             throw new ServletException("Error al procesar el registro", e);
         }

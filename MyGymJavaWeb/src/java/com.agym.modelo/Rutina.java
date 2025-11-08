@@ -4,11 +4,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * Representa una rutina de entrenamiento completa, compuesta por varios días.
- * <p>
- * Esta clase funciona como un contenedor para una lista de objetos {@link DiaRutina},
- * estructurando una semana o ciclo de entrenamiento.
- * </p>
+ * Representa una rutina de entrenamiento, compuesta por varios días.
+ * Funciona como un contenedor para una lista de {@link DiaRutina}.
  */
 public class Rutina {
 
@@ -28,10 +25,7 @@ public class Rutina {
 
     /**
      * Representa un día específico de entrenamiento dentro de una rutina.
-     * <p>
-     * Es un Value Object que agrupa una lista de ejercicios bajo un nombre
-     * descriptivo (ej. "Día 1: Empuje").
-     * </p>
+     * Es un Value Object que agrupa ejercicios bajo un nombre.
      */
     public static class DiaRutina {
         private String nombre;

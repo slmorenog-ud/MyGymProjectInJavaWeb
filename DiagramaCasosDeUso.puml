@@ -1,0 +1,41 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Usuario del Gimnasio" as user
+
+rectangle "Sistema MyGymJavaWeb" {
+  usecase "Iniciar Sesión" as UC1
+  usecase "Registrarse en el sistema" as UC2
+  usecase "Generar Rutina" as UC3
+  usecase "Consultar Historial de Rutinas" as UC4
+  usecase "Guardar Rutina en Historial" as UC5
+  usecase "Visualizar Rutina Generada" as UC6
+  usecase "Marcar Rutina como Completada" as UC7
+  usecase "Cerrar Sesión" as UC8
+}
+
+' Relaciones directas del actor con los casos de uso
+user -- UC2
+user -- UC3
+user -- UC4
+user -- UC8
+user -- UC1
+
+' Relaciones de inclusión (include)
+UC3 ..> UC1 : <<include>>
+UC4 ..> UC1 : <<include>>
+UC8 ..> UC1 : <<include>>
+
+' Relaciones de extensión (extend)
+UC5 .up.> UC6 : <<extend>>
+UC7 .up.> UC4 : <<extend>>
+
+' Otras relaciones
+UC3 --> UC6
+
+' Notas aclaratorias
+note top of UC7 : El usuario puede marcar una rutina como\ncompletada desde la lista de su historial,\nsiempre que esta no lo esté ya.
+note top of UC5 : El usuario solo puede guardar la rutina\ndesde la pantalla de visualización,\nsiendo una acción opcional.
+
+@enduml

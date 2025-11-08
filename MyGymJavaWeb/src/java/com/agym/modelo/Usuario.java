@@ -2,11 +2,7 @@ package com.agym.modelo;
 
 /**
  * Representa a un usuario en el sistema.
- * <p>
- * Esta clase es un Plain Old Java Object (POJO) que contiene toda la
- * información personal y de entrenamiento de un usuario. Funciona como el
- * modelo de datos principal para la entidad Usuario.
- * </p>
+ * Es un POJO (Plain Old Java Object) que contiene los datos del usuario.
  */
 public class Usuario {
     private int id;
@@ -23,6 +19,7 @@ public class Usuario {
     private String prioridadMuscular;
 
     // Getters y Setters
+    // Principio: KISS - Getters y Setters simples y directos.
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getNombre() { return nombre; }

@@ -1,130 +1,109 @@
 classDiagram
     direction TB
 
-    subgraph Presentation_Layer
-        class HttpServlet {
-            <<Abstract>>
-        }
-        class RegistroServlet {
-            +doPost()
-        }
-        class LoginServlet {
-            +doPost()
-        }
-        class GenerarRutinaServlet {
-            +doPost()
-        }
-        class GuardarRutinaServlet {
-            +doPost()
-        }
-        class HistorialServlet {
-            +doGet()
-        }
-        class MarcarCompletadaServlet {
-            +doPost()
-        }
-        class LogoutServlet {
-            +doPost()
-        }
+    class HttpServlet {
+        <<Abstract>>
+    }
+    class RegistroServlet
+    class LoginServlet
+    class GenerarRutinaServlet
+    class GuardarRutinaServlet
+    class HistorialServlet
+    class MarcarCompletadaServlet
+    class LogoutServlet
 
-        HttpServlet <|-- RegistroServlet
-        HttpServlet <|-- LoginServlet
-        HttpServlet <|-- GenerarRutinaServlet
-        HttpServlet <|-- GuardarRutinaServlet
-        HttpServlet <|-- HistorialServlet
-        HttpServlet <|-- MarcarCompletadaServlet
-        HttpServlet <|-- LogoutServlet
-    end
+    class GeneradorRutinaFactory {
+        <<Factory>>
+        +getGenerador(int) GeneradorRutinaBase
+    }
+    class GeneradorRutinaBase {
+        <<Abstract>>
+        +generar(Usuario, List~Ejercicio~) Rutina
+        #construirRutina(Rutina, ...) void
+    }
+    class GeneradorRutina2Dias
+    class GeneradorRutina3Dias
+    class GeneradorRutina4Dias
 
-    subgraph Business_Logic_Layer
-        class GeneradorRutinaFactory {
-            <<Factory>>
-            +getGenerador(int) GeneradorRutinaBase
-        }
-        class GeneradorRutinaBase {
-            <<Abstract>>
-            +generar(Usuario, List~Ejercicio~) Rutina
-            #construirRutina(...)
-        }
-        class GeneradorRutina2Dias
-        class GeneradorRutina3Dias
-        class GeneradorRutina4Dias
+    class JsonUtil {
+        <<Utility>>
+        +leerUsuarios() List~Usuario~
+        +escribirUsuarios(List~Usuario~)
+        +leerEjercicios() List~Ejercicio~
+        +escribirRutinasGuardadas(...)
+    }
 
-        GeneradorRutinaBase <|-- GeneradorRutina2Dias
-        GeneradorRutinaBase <|-- GeneradorRutina3Dias
-        GeneradorRutinaBase <|-- GeneradorRutina4Dias
-    end
+    class Usuario {
+        -int id
+        -String nombre
+        -String email
+        -String password
+        -String fechaNacimiento
+        -String genero
+        -double altura
+        -double peso
+        -String experiencia
+        -String objetivo
+        -int diasDisponibles
+        -String prioridadMuscular
+    }
+    class Rutina {
+        -List~DiaRutina~ dias
+    }
+    class DiaRutina {
+        <<ValueObject>>
+        -String nombre
+        -List~Ejercicio~ ejercicios
+    }
+    class Ejercicio {
+        -int id
+        -String nombre
+        -String grupoMuscular
+        -String dificultad
+    }
+    class RutinaGuardada {
+        -long id
+        -int usuarioId
+        -Date fechaGuardada
+        -Rutina rutina
+        -String estado
+    }
 
-    subgraph Data_Access_Utility
-        class JsonUtil {
-            <<Utility>>
-            +leerUsuarios() List~Usuario~
-            +escribirUsuarios(List~Usuario~)
-            +leerEjercicios() List~Ejercicio~
-            +leerRutinasGuardadas() List~RutinaGuardada~
-            +escribirRutinasGuardadas(List~RutinaGuardada~)
-        }
-    end
+    %% --- Herencia ---
+    HttpServlet <|-- RegistroServlet
+    HttpServlet <|-- LoginServlet
+    HttpServlet <|-- GenerarRutinaServlet
+    HttpServlet <|-- GuardarRutinaServlet
+    HttpServlet <|-- HistorialServlet
+    HttpServlet <|-- MarcarCompletadaServlet
+    HttpServlet <|-- LogoutServlet
 
-    subgraph Model_Layer
-        class Usuario {
-            -int id
-            -String nombre
-            -String email
-            -String password
-            -int diasDisponibles
-            -String objetivo
-        }
-        class Rutina {
-            -List~DiaRutina~ dias
-        }
-        class DiaRutina {
-            <<ValueObject>>
-            -String nombre
-            -List~Ejercicio~ ejercicios
-        }
-        class Ejercicio {
-            -int id
-            -String nombre
-            -String grupoMuscular
-            -String dificultad
-        }
-        class RutinaGuardada {
-            -long id
-            -int usuarioId
-            -Date fechaGuardada
-            -Rutina rutina
-        }
-    end
+    GeneradorRutinaBase <|-- GeneradorRutina2Dias
+    GeneradorRutinaBase <|-- GeneradorRutina3Dias
+    GeneradorRutinaBase <|-- GeneradorRutina4Dias
 
-    %% --- Relationships ---
+    %% --- Relaciones Clave de Diseño ---
+    GenerarRutinaServlet ..> GenerarRutinaBase : "uses"
+    GenerarRutinaServlet ..> GeneradorRutinaFactory : "uses"
 
-    %% Presentation -> Logic
-    GenerarRutinaServlet --> GeneradorRutinaFactory
+    GeneradorRutinaFactory ..> GeneradorRutina2Dias : "creates"
+    GeneradorRutinaFactory ..> GeneradorRutina3Dias : "creates"
+    GeneradorRutinaFactory ..> GeneradorRutina4Dias : "creates"
 
-    %% Logic -> Logic
-    GeneradorRutinaFactory --> GeneradorRutinaBase
-
-    %% Presentation -> Data/Utility
+    %% --- Dependencias ---
     RegistroServlet --> JsonUtil
     LoginServlet --> JsonUtil
     GenerarRutinaServlet --> JsonUtil
     GuardarRutinaServlet --> JsonUtil
     HistorialServlet --> JsonUtil
     MarcarCompletadaServlet --> JsonUtil
-
-    %% Presentation -> Model
     GenerarRutinaServlet --> Usuario
-    GuardarRutinaServlet --> RutinaGuardada
-    HistorialServlet --> RutinaGuardada
-    MarcarCompletadaServlet --> RutinaGuardada
 
-    %% Logic -> Model
     GeneradorRutinaBase --> Usuario
     GeneradorRutinaBase --> Ejercicio
     GeneradorRutinaBase --> Rutina
 
-    %% Model -> Model (Composition & Aggregation)
+    %% --- Composición y Agregación ---
     Rutina "1" *-- "1..*" DiaRutina
     DiaRutina "1" *-- "1..*" Ejercicio
     RutinaGuardada o-- "1" Rutina

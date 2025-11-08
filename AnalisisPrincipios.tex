@@ -1,0 +1,270 @@
+\documentclass[11pt,a4paper]{article}
+
+%----------------------------------------------------------------------
+% PREÁMBULO Y CONFIGURACIÓN DE PAQUETES
+%----------------------------------------------------------------------
+
+% --- Fuentes y Soporte de Idioma ---
+\usepackage{fontspec}
+\setmainfont{Source Sans Pro} % Fuente principal, elegante y legible
+\setmonofont{JetBrains Mono} % Fuente monoespaciada, ideal para código
+
+\usepackage[spanish]{babel} % Soporte para el idioma español
+
+% --- Diseño de Página y Estructura ---
+\usepackage{geometry}
+\geometry{margin=2.5cm} % Márgenes generosos
+\usepackage{parskip} % Párrafos separados por espacio vertical, no por indentación
+\usepackage{hyperref} % Enlaces internos y externos
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+}
+
+% --- Encabezados y Pies de Página ---
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Análisis de Principios de Diseño}
+\fancyhead[R]{MyGymJavaWeb}
+\fancyfoot[C]{\thepage}
+
+%----------------------------------------------------------------------
+% CONFIGURACIÓN DE LISTINGS PARA EL CÓDIGO
+%----------------------------------------------------------------------
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Definición de colores para el estilo del código
+\definecolor{codebg}{rgb}{0.96,0.96,0.96}      % Fondo ligeramente gris
+\definecolor{codeframe}{rgb}{0.85,0.85,0.85}   % Borde del marco
+\definecolor{keyword}{rgb}{0.13,0.13,0.85}     % Palabras clave (azul oscuro)
+\definecolor{comment}{rgb}{0.25,0.5,0.35}      % Comentarios (verde)
+\definecolor{string}{rgb}{0.75,0.0,0.0}        % Cadenas de texto (rojo oscuro)
+\definecolor{linenumber}{rgb}{0.5,0.5,0.5}      % Números de línea (gris)
+
+% Definición del estilo "mintedlike"
+\lstdefinestyle{mintedlike}{
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  framesep=6pt,
+  framerule=0.6pt,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{keyword}\bfseries,
+  commentstyle=\itshape\color{comment},
+  stringstyle=\color{string},
+  numbers=left,
+  numberstyle=\tiny\color{linenumber},
+  stepnumber=1,
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  postbreak=\mbox{\textcolor{codeframe}{$\hookrightarrow$}\space},
+  tabsize=2,
+  captionpos=b,
+  xleftmargin=6pt,
+  xrightmargin=0pt
+}
+
+% Aplicar el estilo globalmente
+\lstset{style=mintedlike, language=Java}
+
+
+%----------------------------------------------------------------------
+% DOCUMENTO PRINCIPAL
+%----------------------------------------------------------------------
+\begin{document}
+
+\title{Análisis de Principios de Diseño de Software \\ \large Aplicados en el Proyecto MyGymJavaWeb}
+\author{My name \\ Código: My code}
+\date{\today}
+\maketitle
+
+\begin{abstract}
+Este documento detalla la aplicación de principios fundamentales de diseño de software en el desarrollo del proyecto MyGymJavaWeb. El objetivo es evidenciar cómo estos principios han guiado la arquitectura del sistema para hacerlo más mantenible, escalable y robusto, utilizando un enfoque que combina patrones de diseño como el Template Method y Factory.
+\end{abstract}
+
+% --- PRINCIPIOS CLAVE ---
+
+\section{Principio de Abierto/Cerrado (Open/Closed Principle - OCP)}
+\subsection{Definición}
+El principio de Abierto/Cerrado establece que las entidades de software deben estar \textit{abiertas para la extensión, pero cerradas para la modificación}.
+
+\subsection{Aplicación en MyGymJavaWeb}
+El ejemplo más claro de OCP es el sistema de generación de rutinas.
+\begin{itemize}
+    \item \textbf{Cerrado a la modificación:} La clase \texttt{GeneradorRutinaBase} contiene la lógica principal en su método \texttt{final generar()}. Este método define el algoritmo (ajuste por edad, series/repeticiones, etc.) y no puede ser modificado por las subclases. El código cliente, como el \texttt{GenerarRutinaServlet}, tampoco necesita cambios.
+    \item \textbf{Abierto a la extensión:} Para añadir una nueva rutina (ej. para 5 días), no se modifica el código existente. Simplemente se crea una nueva clase \texttt{GeneradorRutina5Dias} que herede de \texttt{GeneradorRutinaBase} y se actualiza la \texttt{GeneradorRutinaFactory} para que la reconozca.
+\end{itemize}
+\begin{lstlisting}[caption={La Factory es el único punto de extensión, manteniendo el resto del código cerrado}]
+public class GeneradorRutinaFactory {
+    public static GeneradorRutinaBase getGenerador(int diasDisponibles) {
+        switch (diasDisponibles) {
+            case 2:
+                return new GeneradorRutina2Dias();
+            case 3:
+                return new GeneradorRutina3Dias();
+            case 4:
+                return new GeneradorRutina4Dias();
+            // Para extender, se añadiría aquí un "case 5:"
+            default:
+                throw new IllegalArgumentException("Número de días no soportado.");
+        }
+    }
+}
+\end{lstlisting}
+
+\section{Principio de Sustitución de Liskov (Liskov Substitution Principle - LSP)}
+\subsection{Definición}
+Este principio afirma que los objetos de una superclase deben poder ser reemplazados por objetos de una subclase sin afectar la correctitud del programa.
+
+\subsection{Aplicación en MyGymJavaWeb}
+El LSP se cumple perfectamente en el diseño del generador de rutinas. El \texttt{GenerarRutinaServlet} (cliente) opera con la abstracción \texttt{GeneradorRutinaBase}, sin conocer la implementación concreta.
+Puede recibir un objeto \texttt{GeneradorRutina2Dias}, \texttt{GeneradorRutina3Dias}, o cualquier otra subclase futura de la factory, y el programa funcionará correctamente porque todas las subclases respetan el contrato de la clase base.
+\begin{lstlisting}[caption={El Servlet depende de la abstracción, permitiendo la sustitución}]
+// En GenerarRutinaServlet.java
+// 1. El servlet no sabe qué generador concreto es.
+GeneradorRutinaBase generador = GeneradorRutinaFactory.getGenerador(usuario.getDiasDisponibles());
+
+// 2. Llama al método de la clase base. LSP garantiza que funcionará
+//    con cualquier subclase (GeneradorRutina2Dias, 3Dias, etc.).
+Rutina rutina = generador.generar(usuario, todosLosEjercicios);
+
+// 3. El resto del código funciona igual sin importar la implementación.
+request.setAttribute("rutina", rutina);
+request.getRequestDispatcher("rutina.jsp").forward(request, response);
+\end{lstlisting}
+
+\section{Principio de Responsabilidad Única (Single Responsibility Principle - SRP)}
+\subsection{Definición}
+Este principio establece que una clase debe tener **una, y solo una, razón para cambiar**.
+
+\subsection{Aplicación en MyGymJavaWeb}
+La arquitectura de servlets sigue este principio. Cada servlet tiene una única responsabilidad bien definida:
+\begin{itemize}
+    \item \texttt{LoginServlet}: Su única razón para cambiar es si la lógica de autenticación se modifica.
+    \item \texttt{RegistroServlet}: Solo se encarga de crear nuevos usuarios.
+    \item \texttt{GuardarRutinaServlet}: Su única responsabilidad es persistir la rutina generada.
+\end{itemize}
+De igual forma, clases como \texttt{JsonUtil} tienen la única responsabilidad de gestionar la persistencia de datos, y \texttt{GeneradorRutinaFactory} solo se encarga de crear objetos.
+\begin{lstlisting}[caption={\texttt{LoginServlet.java}, un ejemplo claro de SRP}]
+@WebServlet("/login")
+public class LoginServlet extends HttpServlet {
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Lógica exclusiva de autenticación...
+    }
+}
+\end{lstlisting}
+
+\section{Principio de Inversión de Dependencias (Dependency Inversion Principle - DIP)}
+\subsection{Definición}
+El DIP establece que los módulos de alto nivel no deben depender de los módulos de bajo nivel; ambos deben depender de abstracciones.
+
+\subsection{Aplicación en MyGymJavaWeb}
+El DIP se observa en dos puntos clave:
+\begin{enumerate}
+    \item \textbf{Generación de Rutinas:} El \texttt{GenerarRutinaServlet} (módulo de alto nivel) no depende de \texttt{GeneradorRutina2Dias} (módulo de bajo nivel). Ambos dependen de la abstracción \texttt{GeneradorRutinaBase}.
+    \item \textbf{Persistencia:} Los servlets (alto nivel) no dependen de la implementación de lectura/escritura de archivos JSON. Dependen de la clase \texttt{JsonUtil}, que actúa como una abstracción sobre el mecanismo de persistencia. Si la persistencia cambiara a una base de datos, los servlets no necesitarían ser modificados.
+\end{enumerate}
+\begin{lstlisting}[caption={Servlet dependiendo de la abstracción de persistencia \texttt{JsonUtil}}]
+// Dentro de un Servlet (módulo de alto nivel)
+String realPath = getServletContext().getRealPath("/");
+
+// No sabe que esto es un archivo JSON. Solo llama a la abstracción.
+List<Usuario> usuarios = JsonUtil.leerUsuarios(realPath);
+
+// De nuevo, no le importa el mecanismo de guardado.
+JsonUtil.escribirUsuarios(usuarios, realPath);
+\end{lstlisting}
+
+\section{Separación de Conceptos (Separation of Concerns - SoC)}
+\subsection{Definición}
+SoC aboga por dividir un programa en secciones distintas, donde cada sección aborda una preocupación separada. Es la base del patrón Modelo-Vista-Controlador (MVC).
+
+\subsection{Aplicación en MyGymJavaWeb}
+La aplicación sigue una arquitectura MVC, que es un ejemplo claro de SoC:
+\begin{itemize}
+    \item \textbf{Modelo (`com.agym.modelo`):} Representa los datos (Usuario, Ejercicio). No sabe cómo se muestran ni manipulan.
+    \item \textbf{Vista (`web/*.jsp`):} Se encarga de la presentación de los datos al usuario. No contiene lógica de negocio.
+    \item \textbf{Controlador (`com.agym.controlador`):} Actúa como intermediario, recibe peticiones, interactúa con el Modelo y decide qué Vista mostrar.
+\end{itemize}
+\begin{lstlisting}[caption={El Controlador delega la presentación a la Vista}]
+// Al final del doPost() en GenerarRutinaServlet (Controlador)
+
+// 1. Prepara los datos (Modelo) para la Vista
+request.setAttribute("rutina", rutina);
+
+// 2. Delega la responsabilidad de renderizar a la Vista (rutina.jsp)
+request.getRequestDispatcher("rutina.jsp").forward(request, response);
+\end{lstlisting}
+
+\section{Principio KISS (Keep It Simple, Stupid)}
+\subsection{Definición}
+KISS aboga por la simplicidad y sostiene que los sistemas funcionan mejor si se mantienen simples.
+
+\subsection{Aplicación en MyGymJavaWeb}
+El principio KISS es una guía en todo el proyecto:
+\begin{itemize}
+    \item \textbf{Persistencia de Datos:} Se usaron archivos JSON en lugar de una base de datos, una solución simple y adecuada para la escala del proyecto.
+    \item \textbf{Lógica Directa:} La lógica de negocio, como el ajuste de series por edad, es clara y fácil de entender.
+\end{itemize}
+\begin{lstlisting}[caption={Lógica KISS para el ajuste por edad en \texttt{GeneradorRutinaBase.java}}]
+// Lógica simple y directa dentro del Template Method
+int edad = calcularEdad(usuario.getFechaNacimiento());
+if (edad > 50) {
+    if (seriesYRepeticionesBase.startsWith("4")) {
+        seriesYRepeticionesBase = "3" + seriesYRepeticionesBase.substring(1);
+    }
+}
+\end{lstlisting}
+
+\section{Principio DRY (Don't Repeat Yourself)}
+\subsection{Definición}
+DRY establece que "cada pieza de conocimiento debe tener una representación única", evitando la duplicación de código.
+
+\subsection{Aplicación en MyGymJavaWeb}
+Se aplica en varios lugares:
+\begin{itemize}
+    \item \textbf{\texttt{JsonUtil}:} Centraliza toda la lógica de lectura/escritura de JSON, evitando que cada servlet la implemente por su cuenta.
+    \item \textbf{\texttt{crearDiaRutina()}:} El método helper en \texttt{GeneradorRutinaBase} encapsula la lógica para crear un día de entrenamiento, evitando que \texttt{GeneradorRutina2Dias}, \texttt{3Dias}, etc., dupliquen este código.
+\end{itemize}
+\begin{lstlisting}[caption={Método helper para evitar duplicación en las subclases}]
+// En GeneradorRutinaBase.java
+protected Rutina.DiaRutina crearDiaRutina(String nombre, ..., String... grupos) {
+    // ... Lógica común para crear un día de rutina ...
+}
+
+// En GeneradorRutina2Dias.java (reutiliza el método)
+@Override
+protected void construirRutina(Rutina r, ...) {
+    r.agregarDia(crearDiaRutina("Día 1", ...));
+    r.agregarDia(crearDiaRutina("Día 2", ...));
+}
+\end{lstlisting}
+
+\section{Principio YAGNI (You Ain't Gonna Need It)}
+\subsection{Definición}
+YAGNI establece que no se deben añadir funcionalidades hasta que no sean estrictamente necesarias.
+
+\subsection{Aplicación en MyGymJavaWeb}
+Se aplicó al implementar el seguimiento de progreso. Se implementó la versión más simple (guardar y marcar como "Completada") en lugar de un sistema complejo de registro de pesos o comentarios, que no era un requisito inicial.
+\begin{lstlisting}[caption={Modelo de datos simple en \texttt{RutinaGuardada.java} siguiendo YAGNI}]
+public class RutinaGuardada {
+    private long id;
+    private int usuarioId;
+    private Date fechaGuardada;
+    private String estado; // Solo "Guardada" o "Completada"
+    private Rutina rutina;
+
+    // No se añadieron campos innecesarios como:
+    // private String comentariosUsuario;
+    // private Map<Integer, String> pesosLevantados;
+}
+\end{lstlisting}
+
+\end{document}
