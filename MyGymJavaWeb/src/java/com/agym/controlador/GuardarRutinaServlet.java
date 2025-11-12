@@ -3,7 +3,7 @@ package com.agym.controlador;
 import com.agym.modelo.Rutina;
 import com.agym.modelo.RutinaGuardada;
 import com.agym.modelo.Usuario;
-import com.agym.util.JsonUtil;
+import com.agym.util.RutinaDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,8 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
+import java.sql.SQLException;
 
 /**
  * Servlet para guardar una rutina generada en el historial del usuario.
@@ -25,7 +24,12 @@ import java.util.concurrent.atomic.AtomicLong;
 @WebServlet("/guardarRutina")
 public class GuardarRutinaServlet extends HttpServlet {
 
-    private AtomicLong idCounter = new AtomicLong(System.currentTimeMillis());
+    private RutinaDAO rutinaDAO;
+
+    @Override
+    public void init() {
+        rutinaDAO = new RutinaDAO();
+    }
 
     /**
      * Procesa la solicitud POST para guardar la rutina.
@@ -45,18 +49,18 @@ public class GuardarRutinaServlet extends HttpServlet {
         Rutina rutinaTemporal = (Rutina) session.getAttribute("rutinaTemporal");
 
         if (rutinaTemporal != null) {
-            String realPath = getServletContext().getRealPath("/");
+            try {
+                RutinaGuardada nuevaRutina = new RutinaGuardada();
+                nuevaRutina.setUsuarioId(usuario.getId());
+                nuevaRutina.setRutina(rutinaTemporal);
+                // El estado y la fecha se establecen por defecto en el constructor de RutinaGuardada
 
-            RutinaGuardada nuevaRutina = new RutinaGuardada();
-            nuevaRutina.setId(idCounter.getAndIncrement());
-            nuevaRutina.setUsuarioId(usuario.getId());
-            nuevaRutina.setRutina(rutinaTemporal);
+                rutinaDAO.guardarRutina(nuevaRutina);
 
-            List<RutinaGuardada> rutinasGuardadas = JsonUtil.leerRutinasGuardadas(realPath);
-            rutinasGuardadas.add(nuevaRutina);
-            JsonUtil.escribirRutinasGuardadas(rutinasGuardadas, realPath);
-
-            session.removeAttribute("rutinaTemporal");
+                session.removeAttribute("rutinaTemporal");
+            } catch (SQLException e) {
+                throw new ServletException("Error de base de datos al guardar la rutina", e);
+            }
         }
         response.sendRedirect("historial");
     }

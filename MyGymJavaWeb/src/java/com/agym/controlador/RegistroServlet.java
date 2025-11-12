@@ -1,14 +1,14 @@
 package com.agym.controlador;
 
 import com.agym.modelo.Usuario;
-import com.agym.util.JsonUtil;
+import com.agym.util.UsuarioDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
+import java.sql.SQLException;
 
 /**
  * Servlet que gestiona el registro de nuevos usuarios.
@@ -19,6 +19,13 @@ import java.util.List;
  */
 @WebServlet("/registro")
 public class RegistroServlet extends HttpServlet {
+
+    private UsuarioDAO usuarioDAO;
+
+    @Override
+    public void init() {
+        usuarioDAO = new UsuarioDAO();
+    }
 
     /**
      * Procesa la solicitud POST para el registro de usuarios.
@@ -34,36 +41,27 @@ public class RegistroServlet extends HttpServlet {
         String fechaNacimiento = request.getParameter("fechaNacimiento");
         String genero = request.getParameter("genero");
 
-        String realPath = getServletContext().getRealPath("/");
-
         try {
-            List<Usuario> usuarios = JsonUtil.leerUsuarios(realPath);
-
-            for (Usuario u : usuarios) {
-                if (u.getEmail().equalsIgnoreCase(email)) {
-                    response.sendRedirect("register.html");
-                    return;
-                }
+            if (usuarioDAO.buscarUsuarioPorEmail(email) != null) {
+                // User already exists
+                response.sendRedirect("register.html?error=emailExists");
+                return;
             }
 
-            int maxId = usuarios.stream().mapToInt(Usuario::getId).max().orElse(0);
-
             Usuario nuevoUsuario = new Usuario();
-            nuevoUsuario.setId(maxId + 1);
             nuevoUsuario.setNombre(nombre);
             nuevoUsuario.setEmail(email);
             nuevoUsuario.setPassword(password); // TODO: Hash passwords
             nuevoUsuario.setFechaNacimiento(fechaNacimiento);
             nuevoUsuario.setGenero(genero);
 
-            usuarios.add(nuevoUsuario);
-            JsonUtil.escribirUsuarios(usuarios, realPath);
+            usuarioDAO.crearUsuario(nuevoUsuario);
 
             response.sendRedirect("login.html");
 
-        } catch (IOException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
-            throw new ServletException("Error al procesar el registro", e);
+            throw new ServletException("Error de base de datos al procesar el registro", e);
         }
     }
 }

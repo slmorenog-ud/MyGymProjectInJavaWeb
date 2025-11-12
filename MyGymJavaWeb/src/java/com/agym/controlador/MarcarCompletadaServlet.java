@@ -1,8 +1,6 @@
 package com.agym.controlador;
 
-import com.agym.modelo.RutinaGuardada;
-import com.agym.modelo.Usuario;
-import com.agym.util.JsonUtil;
+import com.agym.util.RutinaDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,7 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.List;
+import java.sql.SQLException;
 
 /**
  * Servlet para marcar una rutina como "Completada".
@@ -22,6 +20,13 @@ import java.util.List;
  */
 @WebServlet("/marcarCompletada")
 public class MarcarCompletadaServlet extends HttpServlet {
+
+    private RutinaDAO rutinaDAO;
+
+    @Override
+    public void init() {
+        rutinaDAO = new RutinaDAO();
+    }
 
     /**
      * Procesa la solicitud POST para marcar una rutina como completada.
@@ -37,21 +42,13 @@ public class MarcarCompletadaServlet extends HttpServlet {
             return;
         }
 
-        Usuario usuario = (Usuario) session.getAttribute("usuario");
         long rutinaId = Long.parseLong(request.getParameter("rutinaId"));
 
-        String realPath = getServletContext().getRealPath("/");
-        List<RutinaGuardada> rutinasGuardadas = JsonUtil.leerRutinasGuardadas(realPath);
-
-        for (RutinaGuardada rg : rutinasGuardadas) {
-            if (rg.getId() == rutinaId && rg.getUsuarioId() == usuario.getId()) {
-                rg.setEstado("Completada");
-                break;
-            }
+        try {
+            rutinaDAO.actualizarEstadoRutina(rutinaId, "Completada");
+            response.sendRedirect("historial");
+        } catch (SQLException e) {
+            throw new ServletException("Error de base de datos al marcar la rutina como completada", e);
         }
-
-        JsonUtil.escribirRutinasGuardadas(rutinasGuardadas, realPath);
-
-        response.sendRedirect("historial");
     }
 }

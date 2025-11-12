@@ -2,7 +2,7 @@ package com.agym.controlador;
 
 import com.agym.modelo.RutinaGuardada;
 import com.agym.modelo.Usuario;
-import com.agym.util.JsonUtil;
+import com.agym.util.RutinaDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,8 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Servlet para mostrar el historial de rutinas guardadas del usuario.
@@ -23,6 +23,13 @@ import java.util.stream.Collectors;
  */
 @WebServlet("/historial")
 public class HistorialServlet extends HttpServlet {
+
+    private RutinaDAO rutinaDAO;
+
+    @Override
+    public void init() {
+        rutinaDAO = new RutinaDAO();
+    }
 
     /**
      * Procesa la solicitud GET para mostrar el historial.
@@ -39,15 +46,13 @@ public class HistorialServlet extends HttpServlet {
         }
 
         Usuario usuario = (Usuario) session.getAttribute("usuario");
-        String realPath = getServletContext().getRealPath("/");
 
-        List<RutinaGuardada> todasLasRutinas = JsonUtil.leerRutinasGuardadas(realPath);
-        List<RutinaGuardada> rutinasDelUsuario = todasLasRutinas.stream()
-                .filter(rg -> rg.getUsuarioId() == usuario.getId())
-                .sorted((r1, r2) -> r2.getFechaGuardada().compareTo(r1.getFechaGuardada()))
-                .collect(Collectors.toList());
-
-        request.setAttribute("historialRutinas", rutinasDelUsuario);
-        request.getRequestDispatcher("historial.jsp").forward(request, response);
+        try {
+            List<RutinaGuardada> rutinasDelUsuario = rutinaDAO.obtenerRutinasPorUsuario(usuario.getId());
+            request.setAttribute("historialRutinas", rutinasDelUsuario);
+            request.getRequestDispatcher("historial.jsp").forward(request, response);
+        } catch (SQLException e) {
+            throw new ServletException("Error de base de datos al obtener el historial de rutinas", e);
+        }
     }
 }

@@ -1,7 +1,7 @@
 package com.agym.controlador;
 
 import com.agym.modelo.Usuario;
-import com.agym.util.JsonUtil;
+import com.agym.util.UsuarioDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.List;
+import java.sql.SQLException;
 
 /**
  * Servlet que maneja la autenticación de usuarios.
@@ -20,6 +20,13 @@ import java.util.List;
  */
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
+
+    private UsuarioDAO usuarioDAO;
+
+    @Override
+    public void init() {
+        usuarioDAO = new UsuarioDAO();
+    }
 
     /**
      * Procesa la solicitud POST para la autenticación de usuarios.
@@ -32,24 +39,20 @@ public class LoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        String realPath = getServletContext().getRealPath("/");
-
         try {
-            List<Usuario> usuarios = JsonUtil.leerUsuarios(realPath);
+            Usuario usuario = usuarioDAO.buscarUsuarioPorEmail(email);
 
-            for (Usuario usuario : usuarios) {
-                if (usuario.getEmail().equalsIgnoreCase(email) && usuario.getPassword().equals(password)) {
-                    HttpSession session = request.getSession();
-                    session.setAttribute("usuario", usuario);
-                    response.sendRedirect("dashboard.jsp");
-                    return;
-                }
+            if (usuario != null && usuario.getPassword().equals(password)) {
+                HttpSession session = request.getSession();
+                session.setAttribute("usuario", usuario);
+                response.sendRedirect("dashboard.jsp");
+            } else {
+                response.sendRedirect("login.html?error=true");
             }
-            response.sendRedirect("login.html?error=true");
 
-        } catch (IOException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
-            throw new ServletException("Error al procesar el login", e);
+            throw new ServletException("Error de base de datos al procesar el login", e);
         }
     }
 }

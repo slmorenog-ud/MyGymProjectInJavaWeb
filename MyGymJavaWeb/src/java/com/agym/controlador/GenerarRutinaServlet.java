@@ -5,7 +5,8 @@ import com.agym.logic.GeneradorRutinaFactory;
 import com.agym.modelo.Ejercicio;
 import com.agym.modelo.Rutina;
 import com.agym.modelo.Usuario;
-import com.agym.util.JsonUtil;
+import com.agym.util.EjercicioDAO;
+import com.agym.util.UsuarioDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -32,6 +34,15 @@ import java.util.List;
 @WebServlet("/generarRutina")
 public class GenerarRutinaServlet extends HttpServlet {
 
+    private UsuarioDAO usuarioDAO;
+    private EjercicioDAO ejercicioDAO;
+
+    @Override
+    public void init() {
+        usuarioDAO = new UsuarioDAO();
+        ejercicioDAO = new EjercicioDAO();
+    }
+
     /**
      * Procesa la solicitud POST para generar una nueva rutina.
      */
@@ -48,31 +59,28 @@ public class GenerarRutinaServlet extends HttpServlet {
 
         Usuario usuario = (Usuario) session.getAttribute("usuario");
 
-        usuario.setAltura(Double.parseDouble(request.getParameter("altura")));
-        usuario.setPeso(Double.parseDouble(request.getParameter("peso")));
-        usuario.setExperiencia(request.getParameter("experiencia"));
-        usuario.setDiasDisponibles(Integer.parseInt(request.getParameter("dias")));
-        usuario.setObjetivo(request.getParameter("objetivo"));
-        usuario.setPrioridadMuscular(request.getParameter("prioridadMuscular"));
+        try {
+            usuario.setAltura(Double.parseDouble(request.getParameter("altura")));
+            usuario.setPeso(Double.parseDouble(request.getParameter("peso")));
+            usuario.setExperiencia(request.getParameter("experiencia"));
+            usuario.setDiasDisponibles(Integer.parseInt(request.getParameter("dias")));
+            usuario.setObjetivo(request.getParameter("objetivo"));
+            usuario.setPrioridadMuscular(request.getParameter("prioridadMuscular"));
 
-        String realPath = getServletContext().getRealPath("/");
-        List<Usuario> usuarios = JsonUtil.leerUsuarios(realPath);
-        for (int i = 0; i < usuarios.size(); i++) {
-            if (usuarios.get(i).getId() == usuario.getId()) {
-                usuarios.set(i, usuario);
-                break;
-            }
+            usuarioDAO.actualizarUsuario(usuario);
+
+            List<Ejercicio> todosLosEjercicios = ejercicioDAO.obtenerTodosLosEjercicios();
+
+            GeneradorRutinaBase generador = GeneradorRutinaFactory.getGenerador(usuario.getDiasDisponibles());
+            Rutina rutina = generador.generar(usuario, todosLosEjercicios);
+
+            session.setAttribute("rutinaTemporal", rutina);
+            request.setAttribute("rutina", rutina);
+            request.setAttribute("objetivoUsuario", usuario.getObjetivo());
+            request.getRequestDispatcher("rutina.jsp").forward(request, response);
+
+        } catch (SQLException e) {
+            throw new ServletException("Error de base de datos al generar la rutina", e);
         }
-        JsonUtil.escribirUsuarios(usuarios, realPath);
-
-        List<Ejercicio> todosLosEjercicios = JsonUtil.leerEjercicios(realPath);
-
-        GeneradorRutinaBase generador = GeneradorRutinaFactory.getGenerador(usuario.getDiasDisponibles());
-        Rutina rutina = generador.generar(usuario, todosLosEjercicios);
-
-        session.setAttribute("rutinaTemporal", rutina);
-        request.setAttribute("rutina", rutina);
-        request.setAttribute("objetivoUsuario", usuario.getObjetivo());
-        request.getRequestDispatcher("rutina.jsp").forward(request, response);
     }
 }
