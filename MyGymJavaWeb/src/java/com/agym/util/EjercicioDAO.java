@@ -10,8 +10,13 @@ import java.util.List;
 
 public class EjercicioDAO {
 
+    private Connection conn;
+
+    public EjercicioDAO(Connection conn) {
+        this.conn = conn;
+    }
+
     public List<Ejercicio> getTodosLosEjercicios() {
-        Connection conn = DatabaseUtil.getConnection();
         if (conn == null) return new ArrayList<>();
 
         List<Ejercicio> ejercicios = new ArrayList<>();
@@ -32,12 +37,6 @@ public class EjercicioDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
         return ejercicios;
     }

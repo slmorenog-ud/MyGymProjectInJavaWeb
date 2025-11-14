@@ -9,8 +9,13 @@ import java.sql.Statement;
 
 public class UsuarioDAO {
 
+    private Connection conn;
+
+    public UsuarioDAO(Connection conn) {
+        this.conn = conn;
+    }
+
     public Usuario getUsuarioPorEmail(String email) {
-        Connection conn = DatabaseUtil.getConnection();
         if (conn == null) return null;
 
         Usuario usuario = null;
@@ -32,18 +37,11 @@ public class UsuarioDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
         return usuario;
     }
 
     public void crearUsuario(Usuario usuario) {
-        Connection conn = DatabaseUtil.getConnection();
         if (conn == null) return;
 
         String sql = "INSERT INTO usuarios (nombre, email, password, fechaNacimiento, genero) VALUES (?, ?, ?, ?, ?)";
@@ -63,17 +61,10 @@ public class UsuarioDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 
     public void actualizarUsuario(Usuario usuario) {
-        Connection conn = DatabaseUtil.getConnection();
         if (conn == null) return;
 
         String sql = "UPDATE usuarios SET nombre = ?, email = ?, password = ?, fechaNacimiento = ?, genero = ?, altura = ?, peso = ?, experiencia = ?, diasDisponibles = ?, objetivo = ?, prioridadMuscular = ? WHERE id = ?";
@@ -94,12 +85,6 @@ public class UsuarioDAO {
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 }
