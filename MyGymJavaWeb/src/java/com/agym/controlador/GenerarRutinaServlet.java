@@ -5,7 +5,8 @@ import com.agym.logic.GeneradorRutinaFactory;
 import com.agym.modelo.Ejercicio;
 import com.agym.modelo.Rutina;
 import com.agym.modelo.Usuario;
-import com.agym.util.JsonUtil;
+import com.agym.util.EjercicioDAO;
+import com.agym.util.UsuarioDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -55,17 +56,11 @@ public class GenerarRutinaServlet extends HttpServlet {
         usuario.setObjetivo(request.getParameter("objetivo"));
         usuario.setPrioridadMuscular(request.getParameter("prioridadMuscular"));
 
-        String realPath = getServletContext().getRealPath("/");
-        List<Usuario> usuarios = JsonUtil.leerUsuarios(realPath);
-        for (int i = 0; i < usuarios.size(); i++) {
-            if (usuarios.get(i).getId() == usuario.getId()) {
-                usuarios.set(i, usuario);
-                break;
-            }
-        }
-        JsonUtil.escribirUsuarios(usuarios, realPath);
+        UsuarioDAO usuarioDAO = new UsuarioDAO();
+        usuarioDAO.actualizarUsuario(usuario);
 
-        List<Ejercicio> todosLosEjercicios = JsonUtil.leerEjercicios(realPath);
+        EjercicioDAO ejercicioDAO = new EjercicioDAO();
+        List<Ejercicio> todosLosEjercicios = ejercicioDAO.getTodosLosEjercicios();
 
         GeneradorRutinaBase generador = GeneradorRutinaFactory.getGenerador(usuario.getDiasDisponibles());
         Rutina rutina = generador.generar(usuario, todosLosEjercicios);

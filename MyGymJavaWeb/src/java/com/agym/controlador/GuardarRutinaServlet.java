@@ -3,7 +3,7 @@ package com.agym.controlador;
 import com.agym.modelo.Rutina;
 import com.agym.modelo.RutinaGuardada;
 import com.agym.modelo.Usuario;
-import com.agym.util.JsonUtil;
+import com.agym.util.RutinaDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,8 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Servlet para guardar una rutina generada en el historial del usuario.
@@ -24,8 +22,6 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @WebServlet("/guardarRutina")
 public class GuardarRutinaServlet extends HttpServlet {
-
-    private AtomicLong idCounter = new AtomicLong(System.currentTimeMillis());
 
     /**
      * Procesa la solicitud POST para guardar la rutina.
@@ -45,16 +41,12 @@ public class GuardarRutinaServlet extends HttpServlet {
         Rutina rutinaTemporal = (Rutina) session.getAttribute("rutinaTemporal");
 
         if (rutinaTemporal != null) {
-            String realPath = getServletContext().getRealPath("/");
-
             RutinaGuardada nuevaRutina = new RutinaGuardada();
-            nuevaRutina.setId(idCounter.getAndIncrement());
             nuevaRutina.setUsuarioId(usuario.getId());
             nuevaRutina.setRutina(rutinaTemporal);
 
-            List<RutinaGuardada> rutinasGuardadas = JsonUtil.leerRutinasGuardadas(realPath);
-            rutinasGuardadas.add(nuevaRutina);
-            JsonUtil.escribirRutinasGuardadas(rutinasGuardadas, realPath);
+            RutinaDAO rutinaDAO = new RutinaDAO();
+            rutinaDAO.guardarRutina(nuevaRutina);
 
             session.removeAttribute("rutinaTemporal");
         }

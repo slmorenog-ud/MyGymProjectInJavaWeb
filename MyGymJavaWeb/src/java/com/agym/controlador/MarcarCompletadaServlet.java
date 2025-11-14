@@ -1,24 +1,21 @@
 package com.agym.controlador;
 
-import com.agym.modelo.RutinaGuardada;
-import com.agym.modelo.Usuario;
-import com.agym.util.JsonUtil;
+import com.agym.util.RutinaDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
- * Servlet para marcar una rutina como "Completada".
+ * Servlet para marcar una rutina como completada.
  * Su única responsabilidad es actualizar el estado de una rutina.
  *
  * --- Principios de Diseño Clave ---
- * SRP (Single Responsibility Principle): Solo actualiza el estado.
+ * SRP (Single Responsibility Principle): Solo se encarga de marcar
+ * la rutina, no de la lógica de negocio asociada.
  */
 @WebServlet("/marcarCompletada")
 public class MarcarCompletadaServlet extends HttpServlet {
@@ -31,26 +28,10 @@ public class MarcarCompletadaServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("usuario") == null) {
-            response.sendRedirect("login.html");
-            return;
-        }
-
-        Usuario usuario = (Usuario) session.getAttribute("usuario");
         long rutinaId = Long.parseLong(request.getParameter("rutinaId"));
 
-        String realPath = getServletContext().getRealPath("/");
-        List<RutinaGuardada> rutinasGuardadas = JsonUtil.leerRutinasGuardadas(realPath);
-
-        for (RutinaGuardada rg : rutinasGuardadas) {
-            if (rg.getId() == rutinaId && rg.getUsuarioId() == usuario.getId()) {
-                rg.setEstado("Completada");
-                break;
-            }
-        }
-
-        JsonUtil.escribirRutinasGuardadas(rutinasGuardadas, realPath);
+        RutinaDAO rutinaDAO = new RutinaDAO();
+        rutinaDAO.marcarComoCompletada(rutinaId);
 
         response.sendRedirect("historial");
     }
