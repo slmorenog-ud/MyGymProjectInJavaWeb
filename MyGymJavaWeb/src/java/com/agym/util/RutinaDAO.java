@@ -14,9 +14,13 @@ import java.util.List;
 public class RutinaDAO {
 
     private final Gson gson = new Gson();
+    private Connection conn;
+
+    public RutinaDAO(Connection conn) {
+        this.conn = conn;
+    }
 
     public void guardarRutina(RutinaGuardada rutinaGuardada) {
-        Connection conn = DatabaseUtil.getConnection();
         if (conn == null) return;
 
         String sql = "INSERT INTO rutinas_guardadas (usuario_id, rutina_json) VALUES (?, ?)";
@@ -33,17 +37,10 @@ public class RutinaDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 
     public List<RutinaGuardada> getRutinasPorUsuario(int usuarioId) {
-        Connection conn = DatabaseUtil.getConnection();
         if (conn == null) return new ArrayList<>();
 
         List<RutinaGuardada> rutinas = new ArrayList<>();
@@ -68,18 +65,11 @@ public class RutinaDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
         return rutinas;
     }
 
     public void marcarComoCompletada(long rutinaId) {
-        Connection conn = DatabaseUtil.getConnection();
         if (conn == null) return;
 
         String sql = "UPDATE rutinas_guardadas SET completada = TRUE WHERE id = ?";
@@ -89,12 +79,6 @@ public class RutinaDAO {
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 }
