@@ -1,14 +1,13 @@
 package com.agym.controlador;
 
 import com.agym.modelo.Usuario;
-import com.agym.util.JsonUtil;
+import com.agym.util.UsuarioDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Servlet que gestiona el registro de nuevos usuarios.
@@ -34,36 +33,23 @@ public class RegistroServlet extends HttpServlet {
         String fechaNacimiento = request.getParameter("fechaNacimiento");
         String genero = request.getParameter("genero");
 
-        String realPath = getServletContext().getRealPath("/");
+        UsuarioDAO usuarioDAO = new UsuarioDAO();
 
-        try {
-            List<Usuario> usuarios = JsonUtil.leerUsuarios(realPath);
-
-            for (Usuario u : usuarios) {
-                if (u.getEmail().equalsIgnoreCase(email)) {
-                    response.sendRedirect("register.html");
-                    return;
-                }
-            }
-
-            int maxId = usuarios.stream().mapToInt(Usuario::getId).max().orElse(0);
-
-            Usuario nuevoUsuario = new Usuario();
-            nuevoUsuario.setId(maxId + 1);
-            nuevoUsuario.setNombre(nombre);
-            nuevoUsuario.setEmail(email);
-            nuevoUsuario.setPassword(password); // TODO: Hash passwords
-            nuevoUsuario.setFechaNacimiento(fechaNacimiento);
-            nuevoUsuario.setGenero(genero);
-
-            usuarios.add(nuevoUsuario);
-            JsonUtil.escribirUsuarios(usuarios, realPath);
-
-            response.sendRedirect("login.html");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new ServletException("Error al procesar el registro", e);
+        // Verificar si el usuario ya existe
+        if (usuarioDAO.getUsuarioPorEmail(email) != null) {
+            response.sendRedirect("register.html?error=email");
+            return;
         }
+
+        Usuario nuevoUsuario = new Usuario();
+        nuevoUsuario.setNombre(nombre);
+        nuevoUsuario.setEmail(email);
+        nuevoUsuario.setPassword(password); // TODO: Hash passwords
+        nuevoUsuario.setFechaNacimiento(fechaNacimiento);
+        nuevoUsuario.setGenero(genero);
+
+        usuarioDAO.crearUsuario(nuevoUsuario);
+
+        response.sendRedirect("login.html");
     }
 }
