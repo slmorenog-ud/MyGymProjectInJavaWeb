@@ -1,6 +1,7 @@
 package com.agym.controlador;
 
 import com.agym.modelo.Usuario;
+import com.agym.util.DatabaseUtil;
 import com.agym.util.UsuarioDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -28,11 +29,19 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        DatabaseUtil dbUtil = new DatabaseUtil();
+        if (dbUtil.getConexion() == null) {
+            response.sendRedirect("error.jsp?msg=" + DatabaseUtil.getMensaje());
+            return;
+        }
+
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        UsuarioDAO usuarioDAO = new UsuarioDAO();
+        UsuarioDAO usuarioDAO = new UsuarioDAO(dbUtil.getConexion());
         Usuario usuario = usuarioDAO.getUsuarioPorEmail(email);
+
+        dbUtil.desconectar();
 
         if (usuario != null && usuario.getPassword().equals(password)) {
             HttpSession session = request.getSession();
